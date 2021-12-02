@@ -34,6 +34,15 @@ collect_files(BlizzardArchiveLib_headers "${CMAKE_CURRENT_SOURCE_DIR}/include" t
 collect_files(TestConsole_source "${CMAKE_CURRENT_SOURCE_DIR}/test" false "*.cpp" "")
 collect_files(TestConsole_headers "${CMAKE_CURRENT_SOURCE_DIR}/test" false "*.h;*.hpp;*.inl" "")
 
+assign_source_group(
+  ${stormlib_headers} 
+  ${casclib_headers} 
+  ${BlizzardArchiveLib_source} 
+  ${BlizzardArchiveLib_headers} 
+  ${TestConsole_source} 
+  ${TestConsole_headers} 
+)
+
 ADD_LIBRARY(BlizzardArchiveLib  
     ${BlizzardArchiveLib_source} 
     ${BlizzardArchiveLib_headers} 
