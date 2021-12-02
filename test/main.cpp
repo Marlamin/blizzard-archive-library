@@ -1,10 +1,10 @@
-#include <iostream>
-#include <string>
-#include <filesystem>
-#include <chrono>
-#include <thread>
+#include <BlizzardArchive.h>
 
 int main(int argc, char* argv[])
 {
+    auto archive = BlizzardArchive();
+
+    archive.CheckVersions();
+
     return 0;
 }
