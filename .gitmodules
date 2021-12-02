@@ -1,0 +1,6 @@
+[submodule "external/stormlib"]
+	path = external/stormlib
+	url = https://github.com/ladislav-zezula/StormLib.git
+[submodule "external/casclib"]
+	path = external/casclib
+	url = https://github.com/ladislav-zezula/CascLib.git
