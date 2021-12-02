@@ -1,9 +1,16 @@
 #include <iostream>
+#include <StormLib.h>
+
+enum class ArchiveVersion : char
+{
+	MPQ,
+	CASC
+};
 
 class BlizzardArchive
 {
 public:
 	BlizzardArchive() = default;
 
-	void CheckVersions();
+	void OpenArchive(ArchiveVersion version, std::string path);
 };
