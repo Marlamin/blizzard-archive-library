@@ -12,5 +12,5 @@ class BlizzardArchive
 public:
 	BlizzardArchive() = default;
 
-	void OpenArchive(ArchiveVersion version, std::string path);
+	void OpenArchive(ArchiveVersion version, std::string const& path);
 };

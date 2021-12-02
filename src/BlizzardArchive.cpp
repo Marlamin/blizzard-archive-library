@@ -1,7 +1,7 @@
 #include <BlizzardArchive.h>
 #include <string>
 
-void BlizzardArchive::OpenArchive(ArchiveVersion version, std::string path)
+void BlizzardArchive::OpenArchive(ArchiveVersion version, std::string const& path)
 {
 	std::cout << "Selected Path : "<< path << std::endl;
 
