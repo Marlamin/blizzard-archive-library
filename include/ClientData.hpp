@@ -6,7 +6,6 @@
 #include <vector>
 #include <string>
 #include <string_view>
-#include <optional>
 #include <Listfile.hpp>
 
 typedef void* HANDLE;
@@ -58,13 +57,46 @@ namespace BlizzardArchive
   public:
     /*
     * path - path to game directory for MPQ-based clients, path to storage directory (the one containing .build.info) for CASC-based clients.
+    * version - version of the game client. Currently only WotLK and Shadowlands are supported.
+    * locale - prefered locale of the client. Wotlk supports automatic detection, for that use Locale::AUTO
+    * local_path - project directory
     */
-    explicit ClientData(std::string const& path, ClientVersion version, Locale locale);
+    explicit ClientData(std::string const& path, ClientVersion version, Locale locale, std::string const& local_path);
 
+    [[nodiscard]]
     ClientVersion version() const { return _version; }
+
+    [[nodiscard]]
     StorageType storageType() const { return _storage_type; }
+
+    [[nodiscard]]
     OpenMode openMode() const { return _open_mode; }
+
+    [[nodiscard]]
     std::string const& path() const { return _path; }
+
+    [[nodiscard]]
+    std::string getDiskPath(Listfile::FileKey const& file_key);
+
+    /* Methods used to universally request client file data in an archive type agnostic way. */
+
+    [[nodiscard]]
+    bool readFile(Listfile::FileKey const& file_key, std::vector<char>& buffer);
+
+    [[nodiscard]]
+    bool exists(Listfile::FileKey const& file_key);
+
+    [[nodiscard]]
+    bool existsOnDisk(Listfile::FileKey const& file_key);
+
+    /* Static helper methods */
+
+    [[nodiscard]]
+    static std::string normalizeFilenameUnix(std::string filename);
+
+    [[nodiscard]]
+    static std::string normalizeFilenameWoW(std::string filename);
+
 
   public:
     inline static constexpr std::array<std::string_view, 10> Locales { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
@@ -101,10 +133,11 @@ namespace BlizzardArchive
     ClientVersion _version;
     Locale _locale_mode;
     std::string _path;
+    std::string _local_path;
 
     // A sorted list of loaded archives. The last one is the most up-to-date one.
     std::vector<Archive::BaseArchive*> _archives;
-    std::optional<Listfile::Listfile> _listfile;
+    Listfile::Listfile _listfile;
 
 
   };

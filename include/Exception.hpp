@@ -7,16 +7,16 @@ namespace BlizzardArchive::Exceptions
 {
   namespace Locale
   {
-    class LocaleNotFoundException : public std::runtime_error
+    class LocaleNotFoundError : public std::runtime_error
     {
     public:
-      LocaleNotFoundException(const std::string& what = "") : std::runtime_error(what) {}
+      LocaleNotFoundError(const std::string& what = "") : std::runtime_error(what) {}
     };
 
-    class IncorrectLocaleModeException : public std::runtime_error
+    class IncorrectLocaleModeError : public std::runtime_error
     {
     public:
-      IncorrectLocaleModeException(const std::string& what = "") : std::runtime_error(what) {}
+      IncorrectLocaleModeError(const std::string& what = "") : std::runtime_error(what) {}
     };
   }
 
@@ -29,6 +29,22 @@ namespace BlizzardArchive::Exceptions
     };
   }
 
+  namespace Listfile
+  {
+    class ListfileNotFoundError : public std::runtime_error
+    {
+    public:
+      ListfileNotFoundError(const std::string& what = "listfile.csv not found by the provided path!") : std::runtime_error(what) {}
+    };
+  }
+
+
+  class FileReadFailedEror : public std::runtime_error
+  {
+  public:
+    FileReadFailedEror(const std::string& what = "") : std::runtime_error(what) {}
+  };
+
 }
 
-#endif
+#endif // BLIZZARD_ARCHIVE_EXCEPTION_HPP

@@ -7,7 +7,7 @@
 using namespace BlizzardArchive;
 namespace fs = std::filesystem;
 
-ClientData::ClientData(std::string const& path, ClientVersion version, Locale locale)
+ClientData::ClientData(std::string const& path, ClientVersion version, Locale locale, std::string const& local_path)
   : _version(version)
   , _open_mode(OpenMode::LOCAL)
   , _storage_type(version > ClientVersion::WOTLK ? StorageType::CASC : StorageType::MPQ)
@@ -56,7 +56,7 @@ void ClientData::initializeMPQStorage()
         mpq_path.replace(location, 1, std::string(&j, 1));
         if (fs::exists(mpq_path))
         {
-          _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode));
+          _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
         }
          
       }
@@ -70,7 +70,7 @@ void ClientData::initializeMPQStorage()
         mpq_path.replace(location, 1, std::string(&c, 1));
         if (fs::exists(mpq_path))
         {
-          _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode));
+          _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
         }
       }
     }
@@ -78,7 +78,7 @@ void ClientData::initializeMPQStorage()
     {
       if (fs::exists(mpq_path))
       {
-        _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode));
+        _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
       }
     }
   }
@@ -102,7 +102,7 @@ void ClientData::validateLocale()
 
       if (!fs::exists(realmlist_path))
       {
-        throw Exceptions::Locale::LocaleNotFoundException("Requested locale \"" + std::string(ClientData::Locales[static_cast<int>(_locale_mode) - 1].data()) + "\" does not exist in the client directory."
+        throw Exceptions::Locale::LocaleNotFoundError("Requested locale \"" + std::string(ClientData::Locales[static_cast<int>(_locale_mode) - 1].data()) + "\" does not exist in the client directory."
           "Be sure, that there is one containing the file \"realmlist.wtf\".");
       }
 
@@ -121,16 +121,88 @@ void ClientData::validateLocale()
         }
       }
 
-      throw Exceptions::Locale::LocaleNotFoundException("Automatic locale detection failed. The client directory does not contain any locale directory. Be sure, that there is one containing the file \"realmlist.wtf\".");
+      throw Exceptions::Locale::LocaleNotFoundError("Automatic locale detection failed. The client directory does not contain any locale directory. Be sure, that there is one containing the file \"realmlist.wtf\".");
     }
   }
   else if (_storage_type == StorageType::CASC)
   {
     if (_locale_mode == Locale::AUTO)
     {
-      throw Exceptions::Locale::IncorrectLocaleModeException("Automatic locale detection is not supported for CASC-based clients.");
+      throw Exceptions::Locale::IncorrectLocaleModeError("Automatic locale detection is not supported for CASC-based clients.");
     }
   }
   
   
+}
+
+bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& buffer)
+{
+  HANDLE handle = nullptr;
+
+  for (auto it = _archives.rbegin(); it != _archives.rend(); ++it)
+  {
+    if (!(*it)->openFile(file_key, _locale_mode, &handle))
+      continue;
+
+    std::uint64_t buf_size = (*it)->getFileSize(handle);
+    buffer.resize(buf_size);
+
+    (*it)->readFile(handle, buffer.data(), buf_size);
+    (*it)->closeFile(handle);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool ClientData::existsOnDisk(Listfile::FileKey const& file_key)
+{
+  if (!file_key.hasFilepath())
+    return false;
+
+  return fs::exists(file_key.filepath());
+}
+
+bool ClientData::exists(Listfile::FileKey const& file_key)
+{
+  for (auto it = _archives.rbegin(); it != _archives.rend(); ++it)
+  {
+    if ((*it)->exists(file_key, _locale_mode))
+      return true;
+  }
+
+  return false;
+}
+
+std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
+{
+  if (file_key.hasFileDataID())
+    return (fs::path(_local_path) / ClientData::normalizeFilenameUnix(file_key.filepath())).string();
+  else
+    return (fs::path(_local_path) / "unknown_files/" / std::to_string(file_key.fileDataID())).string();
+}
+
+std::string ClientData::normalizeFilenameUnix(std::string filename)
+{
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+  std::transform(filename.begin(), filename.end(), filename.begin()
+    , [](char c)
+    {
+      return c == '\\' ? '/' : c;
+    }
+  );
+  return filename;
+}
+
+std::string ClientData::normalizeFilenameWoW(std::string filename)
+{
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::toupper);
+  std::transform(filename.begin(), filename.end(), filename.begin()
+    , [](char c)
+    {
+      return c == '/' ? '\\' : c;
+    }
+  );
+  return filename;
 }

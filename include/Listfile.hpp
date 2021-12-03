@@ -1,16 +1,28 @@
 #ifndef BIZZZARDARCHIVE_LISTFILE_HPP
 #define BIZZZARDARCHIVE_LISTFILE_HPP
+
 #include <string>
 #include <cstdint>
 #include <optional>
+#include <unordered_map>
 
 namespace BlizzardArchive::Listfile
 {
   class Listfile
   {
   public:
-    Listfile(std::string const& filepath);
+    Listfile();
     ~Listfile() = default;
+
+    void initFromCSV(std::string const& listfile_path);
+    void initFromFileList(std::vector<char> const& file_list_blob);
+
+    std::uint32_t getFileDataID(std::string const& filename);
+    std::string getPath(std::uint32_t file_data_id);
+
+  private:
+    std::unordered_map<std::string, std::uint32_t> _path_to_fdid;
+    std::unordered_map<std::uint32_t, std::string> _fdid_to_path;
   };
 
   class FileKey
@@ -20,8 +32,10 @@ namespace BlizzardArchive::Listfile
     FileKey(std::uint32_t file_data_id);
     FileKey(std::string const& filepath, std::uint32_t file_data_id);
 
-    bool hasFilepath() { return _file_path.has_value(); };
-    bool hasFileDataID() { return static_cast<bool>(_file_data_id); };
+    bool hasFilepath() const { return _file_path.has_value(); };
+    bool hasFileDataID() const { return static_cast<bool>(_file_data_id); };
+    std::string const& filepath() const { return _file_path.value(); };
+    std::uint32_t fileDataID() const { return _file_data_id; };
 
   private:
     std::uint32_t _file_data_id = 0;
