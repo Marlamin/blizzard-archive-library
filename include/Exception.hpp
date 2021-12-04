@@ -34,7 +34,7 @@ namespace BlizzardArchive::Exceptions
     class ListfileNotFoundError : public std::runtime_error
     {
     public:
-      ListfileNotFoundError(const std::string& what = "listfile.csv not found by the provided path!") : std::runtime_error(what) {}
+      ListfileNotFoundError(const std::string& what = "listfile.csv was not found by the provided path!") : std::runtime_error(what) {}
     };
   }
 
