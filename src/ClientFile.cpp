@@ -100,12 +100,15 @@ void ClientFile::save()
   std::ofstream output(_disk_path.string(), std::ios_base::binary | std::ios_base::out);
   if (output.is_open())
   {
-    std::cout << "Saving file \"" << _disk_path << "\"." << std::endl;
-
     output.write(_buffer.data(), _buffer.size());
     output.close();
 
     _external = true;
+  }
+  else
+  {
+
+    std::cout << "Error saving file to: " << _disk_path << std::endl;
   }
   
 }

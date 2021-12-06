@@ -19,7 +19,6 @@ namespace BlizzardArchive
     explicit ClientFile(Listfile::FileKey const& file_key, ClientData* client_data);
 
     ClientFile() = delete;
-    ~ClientFile();
     ClientFile(ClientFile const&) = delete;
     ClientFile(ClientFile&&) = delete;
     ClientFile& operator=(ClientFile const&) = delete;

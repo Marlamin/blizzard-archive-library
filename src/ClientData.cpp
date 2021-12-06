@@ -13,6 +13,7 @@ ClientData::ClientData(std::string const& path, ClientVersion version, Locale lo
   , _storage_type(version > ClientVersion::WOTLK ? StorageType::CASC : StorageType::MPQ)
   , _locale_mode(locale)
   , _path(path)
+  , _local_path(ClientData::normalizeFilenameUnix(local_path))
 {
   validateLocale();
 
@@ -36,7 +37,7 @@ void ClientData::initializeMPQStorage()
     std::string mpq_path = (fs::path(_path) / "Data" / filename).string();
 
     std::string::size_type location(std::string::npos);
-    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode)];
+    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
 
     do
     {
@@ -177,15 +178,20 @@ bool ClientData::exists(Listfile::FileKey const& file_key)
 
 std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
 {
-  if (file_key.hasFileDataID())
+  if (file_key.hasFilepath())
+  {
     return (fs::path(_local_path) / ClientData::normalizeFilenameUnix(file_key.filepath())).string();
+  }
   else
+  {
     return (fs::path(_local_path) / "unknown_files/" / std::to_string(file_key.fileDataID())).string();
+  }
+   
 }
 
 std::string ClientData::normalizeFilenameUnix(std::string filename)
 {
-  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+  //std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
   std::transform(filename.begin(), filename.end(), filename.begin()
     , [](char c)
     {

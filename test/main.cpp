@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
   auto proj_path = std::string("C:\\Users\\Skarn\\Desktop\\test_patch");
   auto wow_fs = BlizzardArchive::ClientData(directory_path, BlizzardArchive::ClientVersion::WOTLK, BlizzardArchive::Locale::AUTO, proj_path);
 
-  auto file = BlizzardArchive::ClientFile(BlizzardArchive::Listfile::FileKey("world/wmo/azeroth/human/buildings/human_farm/farm.wmo"), &wow_fs);
+  auto file = BlizzardArchive::ClientFile(BlizzardArchive::Listfile::FileKey("world/wmo/azeroth/buildings/human_farm/farm.wmo"), &wow_fs);
   file.save();
 
   return 0;
