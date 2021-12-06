@@ -34,6 +34,7 @@ assign_source_group(
 )
 
 FIND_PACKAGE(StormLib REQUIRED )
+FIND_PACKAGE(CascLib REQUIRED )
 
 OPTION(BLIZZARD_ARCHIVE_TEST_CONSOLE "Build Test Console" OFF)
 IF(NOT BLIZZARD_ARCHIVE_TEST_CONSOLE)
@@ -46,5 +47,5 @@ ELSE()
         ${TestConsole_source} 
         ${TestConsole_headers}
     )  
-    TARGET_LINK_LIBRARIES(TestConsole StormLib )
+    TARGET_LINK_LIBRARIES(TestConsole StormLib CascLib)
 ENDIF(NOT BLIZZARD_ARCHIVE_TEST_CONSOLE)
