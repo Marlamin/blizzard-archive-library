@@ -1,6 +1,7 @@
 #include <ClientData.hpp>
 #include <Exception.hpp>
 #include <MPQArchive.hpp>
+#include <CascArchive.hpp>
 
 #include <filesystem>
 
@@ -89,7 +90,7 @@ void ClientData::initializeMPQStorage()
 
 void ClientData::initializeCASCStorage()
 {
-
+  _archives.push_back(new Archive::CASCArchive(_path, _locale_mode, &_listfile));
 }
 
 void ClientData::validateLocale()
