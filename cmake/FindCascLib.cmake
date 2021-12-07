@@ -1,11 +1,24 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 # adds target CascLib
+FetchContent_Declare(
+  casclib
+  GIT_REPOSITORY https://gitlab.com/alister.greg/dependencies.git
+  GIT_TAG        dep-casclib
+)
+
+FetchContent_GetProperties(casclib)
+if(NOT casclib)
+  FetchContent_Populate(casclib)
+  SET(CASCLIB_INCLUDE_DIR "${casclib_SOURCE_DIR}/includes")
+  SET(CASCLIB_LIBRARY_DEBUG_DIR "${casclib_SOURCE_DIR}/lib/debug/x64")
+  SET(CASCLIB_LIBRARY_RELEASE_DIR "${casclib_SOURCE_DIR}/lib/release/x64")
+endif()
 
 find_path (CASCLIB_INCLUDE_DIR CascLib.h CascPort.h)
 
-find_library (_casc_debug_lib NAMES CascLibDAD CascLibDAS CascLibDUD CascLibDUS)
-find_library (_casc_release_lib NAMES CascLibRAD CascLibRAS CascLibRUD CascLibRUS)
+find_library (_casc_debug_lib NAMES CascLibDAD CascLibDAS CascLibDUD CascLibDUS PATHS ${CASCLIB_LIBRARY_DEBUG_DIR})
+find_library (_casc_release_lib NAMES CascLibRAD CascLibRAS CascLibRUD CascLibRUS PATHS ${CASCLIB_LIBRARY_RELEASE_DIR})
 find_library (_casc_any_lib NAMES Casc Casclib CascLib)
 
 set (CASC_LIBRARIES)

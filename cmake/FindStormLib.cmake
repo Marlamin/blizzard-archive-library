@@ -1,11 +1,24 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 # adds target StormLib
+FetchContent_Declare(
+  stormlib
+  GIT_REPOSITORY https://gitlab.com/alister.greg/dependencies.git
+  GIT_TAG        dep-stormlib
+)
+
+FetchContent_GetProperties(stormlib)
+if(NOT stormlib_POPULATED)
+  FetchContent_Populate(stormlib)
+  SET(STORM_INCLUDE_DIR "${stormlib_SOURCE_DIR}/includes")
+  SET(STORM_LIBRARY_DEBUG_DIR "${stormlib_SOURCE_DIR}/lib/debug/x64")
+  SET(STORM_LIBRARY_RELEASE_DIR "${stormlib_SOURCE_DIR}/lib/release/x64")
+endif()
 
 find_path (STORM_INCLUDE_DIR StormLib.h StormPort.h)
 
-find_library (_storm_debug_lib NAMES StormLibDAD StormLibDAS StormLibDUD StormLibDUS)
-find_library (_storm_release_lib NAMES StormLibRAD StormLibRAS StormLibRUD StormLibRUS)
+find_library (_storm_debug_lib NAMES StormLibDAD StormLibDAS StormLibDUD StormLibDUS PATHS ${STORM_LIBRARY_DEBUG_DIR})
+find_library (_storm_release_lib NAMES StormLibRAD StormLibRAS StormLibRUD StormLibRUS PATHS ${STORM_LIBRARY_RELEASE_DIR})
 find_library (_storm_any_lib NAMES storm stormlib StormLib)
 
 set (STORM_LIBRARIES)
