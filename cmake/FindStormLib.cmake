@@ -3,7 +3,7 @@
 # adds target StormLib
 FetchContent_Declare(
   stormlib
-  GIT_REPOSITORY https://gitlab.com/alister.greg/dependencies.git
+  GIT_REPOSITORY https://gitlab.com/prophecy-rp/dependencies.git
   GIT_TAG        dep-stormlib
 )
 

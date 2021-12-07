@@ -3,7 +3,7 @@
 # adds target CascLib
 FetchContent_Declare(
   casclib
-  GIT_REPOSITORY https://gitlab.com/alister.greg/dependencies.git
+  GIT_REPOSITORY https://gitlab.com/prophecy-rp/dependencies.git
   GIT_TAG        dep-casclib
 )
 
