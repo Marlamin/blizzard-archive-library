@@ -30,7 +30,7 @@ namespace BlizzardArchive::Archive
     [[nodiscard]]
     virtual bool exists(Listfile::FileKey const& file_key, Locale locale) const = 0;
 
-  private:
+  protected:
     std::string _path;
     Locale _locale;
     Listfile::Listfile* _listfile;

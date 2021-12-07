@@ -38,11 +38,10 @@ namespace BlizzardArchive::Exceptions
     };
   }
 
-
-  class FileReadFailedEror : public std::runtime_error
+  class FileReadFailedError : public std::runtime_error
   {
   public:
-    FileReadFailedEror(const std::string& what = "") : std::runtime_error(what) {}
+    FileReadFailedError(const std::string& what = "") : std::runtime_error(what) {}
   };
 
 }

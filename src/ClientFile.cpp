@@ -34,7 +34,7 @@ ClientFile::ClientFile(Listfile::FileKey const& file_key, ClientData* client_dat
     return;
   }
  
-  throw Exceptions::FileReadFailedEror(
+  throw Exceptions::FileReadFailedError(
     "File '"
     + file_key.hasFilepath() ? file_key.filepath() : std::to_string(file_key.fileDataID())
     + "' does not exist or some other error occured.");
