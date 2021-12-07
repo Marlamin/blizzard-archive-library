@@ -9,6 +9,7 @@ FetchContent_Declare(
 
 FetchContent_GetProperties(casclib)
 if(NOT casclib)
+  MESSAGE(STATUS "Installing Casclib...")
   FetchContent_Populate(casclib)
   SET(CASCLIB_INCLUDE_DIR "${casclib_SOURCE_DIR}/includes")
   SET(CASCLIB_LIBRARY_DEBUG_DIR "${casclib_SOURCE_DIR}/lib/debug/x64")

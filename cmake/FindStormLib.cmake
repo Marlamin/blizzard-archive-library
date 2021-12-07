@@ -9,6 +9,7 @@ FetchContent_Declare(
 
 FetchContent_GetProperties(stormlib)
 if(NOT stormlib_POPULATED)
+  MESSAGE(STATUS "Installing Stormlib...")
   FetchContent_Populate(stormlib)
   SET(STORM_INCLUDE_DIR "${stormlib_SOURCE_DIR}/includes")
   SET(STORM_LIBRARY_DEBUG_DIR "${stormlib_SOURCE_DIR}/lib/debug/x64")
