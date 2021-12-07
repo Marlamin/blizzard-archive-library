@@ -62,6 +62,7 @@ namespace BlizzardArchive
     * local_path - project directory
     */
     explicit ClientData(std::string const& path, ClientVersion version, Locale locale, std::string const& local_path);
+    ~ClientData();
 
     [[nodiscard]]
     ClientVersion version() const { return _version; }

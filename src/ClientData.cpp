@@ -31,6 +31,15 @@ ClientData::ClientData(std::string const& path, ClientVersion version, Locale lo
   }
 }
 
+ClientData::~ClientData()
+{
+  // clean up
+  for (auto archive : _archives)
+  {
+    delete archive;
+  }
+}
+
 void ClientData::initializeMPQStorage()
 {
   for (auto const& filename : ClientData::ArchiveNameTemplates)
