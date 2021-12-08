@@ -11,8 +11,14 @@ ClientFile::ClientFile(Listfile::FileKey const& file_key, ClientData* client_dat
   , _eof(true)
   , _pointer(0)
   , _external(false)
-  , _disk_path(client_data->getDiskPath(file_key))
 {
+
+  if (client_data->version() != ClientVersion::WOTLK)
+  {
+    _file_key.deduceOtherComponent(client_data->listfile());
+  }
+  
+  _disk_path = client_data->getDiskPath(_file_key);
 
   std::ifstream input(_disk_path.string(), std::ios_base::binary | std::ios_base::in);
   if (input.is_open())
@@ -36,7 +42,7 @@ ClientFile::ClientFile(Listfile::FileKey const& file_key, ClientData* client_dat
  
   throw Exceptions::FileReadFailedError(
     "File '"
-    + file_key.hasFilepath() ? file_key.filepath() : std::to_string(file_key.fileDataID())
+    + (file_key.hasFilepath() ? file_key.filepath() : std::to_string(file_key.fileDataID()))
     + "' does not exist or some other error occured.");
 }
 

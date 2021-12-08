@@ -87,7 +87,7 @@ void Listfile::initFromFileList(std::vector<char> const& file_list_blob)
   }
 }
 
-std::uint32_t Listfile::getFileDataID(std::string const& filename)
+std::uint32_t Listfile::getFileDataID(std::string const& filename) const
 {
   auto it = _path_to_fdid.find(filename);
 
@@ -101,7 +101,7 @@ std::uint32_t Listfile::getFileDataID(std::string const& filename)
   }
 
 }
-std::string Listfile::getPath(std::uint32_t file_data_id)
+std::string Listfile::getPath(std::uint32_t file_data_id) const
 {
   auto it = _fdid_to_path.find(file_data_id);
 
@@ -114,4 +114,35 @@ std::string Listfile::getPath(std::uint32_t file_data_id)
     return ""; // Not found
   }
 
+}
+
+bool FileKey::deduceOtherComponent(const Listfile* listfile)
+{
+  if (hasFileDataID() && !hasFilepath())
+  {
+    std::string path = listfile->getPath(fileDataID());
+
+    if (path.empty())
+    {
+      return false;
+    }
+
+    _file_path = path;
+    return true;
+
+  }
+  else if (hasFilepath() && !hasFileDataID())
+  {
+    std::uint32_t fdid = listfile->getFileDataID(filepath());
+
+    if (!fdid)
+    {
+      return false;
+    }
+
+    _file_data_id = fdid;
+    return true;
+  }
+
+  return false;
 }

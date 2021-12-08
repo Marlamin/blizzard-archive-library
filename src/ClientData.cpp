@@ -4,6 +4,7 @@
 #include <CascArchive.hpp>
 
 #include <filesystem>
+#include <cassert>
 
 using namespace BlizzardArchive;
 namespace fs = std::filesystem;
@@ -99,6 +100,7 @@ void ClientData::initializeMPQStorage()
 
 void ClientData::initializeCASCStorage()
 {
+  _listfile.initFromCSV((fs::path(_local_path) / "listfile.csv").string());
   _archives.push_back(new Archive::CASCArchive(_path, _locale_mode, &_listfile));
 }
 
@@ -194,7 +196,18 @@ std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
   }
   else
   {
-    return (fs::path(_local_path) / "unknown_files/" / std::to_string(file_key.fileDataID())).string();
+    // try deducing filepath from listfile
+    assert(file_key.hasFileDataID());
+    std::string filepath = _listfile.getPath(file_key.fileDataID());
+
+    if (!filepath.empty())
+    {
+      return (fs::path(_local_path) / ClientData::normalizeFilenameUnix(filepath)).string();
+    }
+    else
+    {
+      return (fs::path(_local_path) / "unknown_files/" / std::to_string(file_key.fileDataID())).string();
+    }
   }
    
 }

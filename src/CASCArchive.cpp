@@ -19,11 +19,13 @@ CASCArchive::CASCArchive(std::string const& path, Locale locale, Listfile::Listf
   args.PfnProductCallback = nullptr;
   args.PtrProductParam = nullptr;
   args.dwLocaleMask = 0;  // TODO: pass locale
+  args.szBuildKey = nullptr;
 
 
   if (!CascOpenStorageEx(nullptr, &args, false, &_handle))
   {
-    throw Exceptions::Archive::ArchiveOpenError("Error opening CASC archive: " + path);
+    throw Exceptions::Archive::ArchiveOpenError("Error opening CASC archive: " + path 
+    + ". Error code: " + std::to_string(GetCascError()));
   }
 }
 
@@ -45,7 +47,7 @@ bool CASCArchive::openFile(Listfile::FileKey const& file_key, Locale locale, HAN
   }
 
 
-  return CascOpenFile(_handle, &file_data_id, 0, 3, file_handle);
+  return CascOpenFile(_handle, CASC_FILE_DATA_ID(file_data_id), 0, 3, file_handle);
 }
 
 bool CASCArchive::readFile(HANDLE file_handle, char* buffer, std::size_t buf_size) const

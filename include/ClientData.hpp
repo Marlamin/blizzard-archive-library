@@ -61,7 +61,11 @@ namespace BlizzardArchive
     * locale - prefered locale of the client. Wotlk supports automatic detection, for that use Locale::AUTO
     * local_path - project directory
     */
-    explicit ClientData(std::string const& path, ClientVersion version, Locale locale, std::string const& local_path);
+    explicit ClientData(std::string const& path
+      , ClientVersion version
+      , Locale locale
+      , std::string const& local_path);
+
     ~ClientData();
 
     [[nodiscard]]
@@ -78,6 +82,8 @@ namespace BlizzardArchive
 
     [[nodiscard]]
     std::string getDiskPath(Listfile::FileKey const& file_key);
+
+    const Listfile::Listfile* listfile() const { return &_listfile; }
 
     /* Methods used to universally request client file data in an archive type agnostic way. */
 
