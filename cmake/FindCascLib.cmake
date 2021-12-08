@@ -35,7 +35,7 @@ find_package_handle_standard_args (CascLib DEFAULT_MSG CASC_LIBRARIES CASCLIB_IN
 mark_as_advanced (CASCLIB_INCLUDE_DIR _casc_debug_lib _casc_release_lib _casc_any_lib CASC_LIBRARIES)
 
 add_library (CascLib INTERFACE)
-target_link_libraries (CascLib INTERFACE ${Casc_LIBRARIES})
+target_link_libraries (CascLib INTERFACE ${CASC_LIBRARIES})
 set_property  (TARGET CascLib APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${CASCLIB_INCLUDE_DIR})
 set_property  (TARGET CascLib APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CASCLIB_INCLUDE_DIR})
 
