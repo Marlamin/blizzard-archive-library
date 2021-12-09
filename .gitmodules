@@ -4,3 +4,7 @@
 [submodule "external/casclib"]
 	path = external/casclib
 	url = https://github.com/ladislav-zezula/CascLib.git
+[submodule "cmake"]
+	path = cmake
+	url = https://gitlab.com/prophecy-rp/build-dependencies.git
+	branch = dep-cmake
