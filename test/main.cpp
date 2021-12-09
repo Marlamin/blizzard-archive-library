@@ -16,7 +16,8 @@ int main(int argc, char* argv[])
 
   // Local CASC storage tests
   {
-    auto directory_path = std::string("D:\\World of Warcraft");
+    //auto directory_path = std::string("D:\\World of Warcraft");
+    auto directory_path = std::string("C:\\Users\\Skarn\\Desktop\\test_patch");
 
     auto wow_fs = BlizzardArchive::ClientData(directory_path, BlizzardArchive::ClientVersion::SL, BlizzardArchive::Locale::enUS, proj_path);
 

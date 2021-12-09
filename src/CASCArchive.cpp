@@ -13,16 +13,17 @@ CASCArchive::CASCArchive(std::string const& path, Locale locale, Listfile::Listf
   args.Size = sizeof(CASC_OPEN_STORAGE_ARGS);
   args.szLocalPath = path.c_str();
   args.szCodeName = "wow";
-  args.szRegion = nullptr;
+  args.szRegion = "us";
   args.PfnProgressCallback = nullptr;
   args.PtrProgressParam = nullptr;
   args.PfnProductCallback = nullptr;
   args.PtrProductParam = nullptr;
   args.dwLocaleMask = 0;  // TODO: pass locale
   args.szBuildKey = nullptr;
+  args.szCdnHostUrl = "http://%s.falloflordaeron.com:8000/%s/%s";
 
 
-  if (!CascOpenStorageEx(nullptr, &args, false, &_handle))
+  if (!CascOpenStorageEx(nullptr, &args, true, &_handle))
   {
     throw Exceptions::Archive::ArchiveOpenError("Error opening CASC archive: " + path 
     + ". Error code: " + std::to_string(GetCascError()));
