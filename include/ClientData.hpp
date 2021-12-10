@@ -93,10 +93,10 @@ namespace BlizzardArchive
     [[nodiscard]]
     bool exists(Listfile::FileKey const& file_key);
 
-    [[nodiscard]]
-    bool existsOnDisk(Listfile::FileKey const& file_key);
-
     /* Static helper methods */
+
+    [[nodiscard]]
+    static bool existsOnDisk(Listfile::FileKey const& file_key);
 
     [[nodiscard]]
     static std::string normalizeFilenameUnix(std::string filename);
