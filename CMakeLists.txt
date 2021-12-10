@@ -37,12 +37,6 @@ assign_source_group(
 FIND_PACKAGE(CascLib REQUIRED)
 FIND_PACKAGE(StormLib REQUIRED)
 
-ADD_LIBRARY(BlizzardArchiveLib  
-    ${BlizzardArchiveLib_source} 
-    ${BlizzardArchiveLib_headers} 
-)
-TARGET_LINK_LIBRARIES(BlizzardArchiveLib CascLib StormLib)
-
 OPTION(BLIZZARD_ARCHIVE_TEST_CONSOLE "Build Test Console" OFF)
 IF(NOT BLIZZARD_ARCHIVE_TEST_CONSOLE)
   MESSAGE(STATUS "Skipping test console build")
@@ -50,6 +44,13 @@ ELSE()
     ADD_EXECUTABLE(TestConsole 
         ${TestConsole_source} 
         ${TestConsole_headers}
-    )  
-    TARGET_LINK_LIBRARIES(TestConsole BlizzardArchiveLib CascLib StormLib)
+        ${BlizzardArchiveLib_source}
+        ${BlizzardArchiveLib_headers}
+    )
+
+    if (WIN32)
+        TARGET_LINK_LIBRARIES(TestConsole CascLib StormLib)
+    ELSE()
+        TARGET_LINK_LIBRARIES(TestConsole CascLib StormLib z)
+    ENDIF()
 ENDIF(NOT BLIZZARD_ARCHIVE_TEST_CONSOLE)

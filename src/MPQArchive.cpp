@@ -60,6 +60,6 @@ bool MPQArchive::exists(Listfile::FileKey const& file_key, Locale locale) const
 
 MPQArchive::~MPQArchive()
 {
-if (_handle)
-  SFileCloseArchive(_handle);
+  if (_handle)
+    SFileCloseArchive(_handle);
 }

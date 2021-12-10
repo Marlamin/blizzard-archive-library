@@ -66,9 +66,9 @@ bool CASCArchive::closeFile(HANDLE file_handle) const
 std::uint64_t CASCArchive::getFileSize(HANDLE file_handle) const
 {
   assert(file_handle);
-  std::uint64_t size;
+  unsigned long long size;
 
-  CascGetFileSize64(file_handle, &size);
+  CascGetFileSize64(file_handle, static_cast<PULONGLONG>(&size));
 
   return size;
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <optional>
+#include <vector>
 #include <unordered_map>
 
 namespace BlizzardArchive::Listfile

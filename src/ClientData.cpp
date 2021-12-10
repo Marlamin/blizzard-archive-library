@@ -1,7 +1,7 @@
 #include <ClientData.hpp>
 #include <Exception.hpp>
 #include <MPQArchive.hpp>
-#include <CascArchive.hpp>
+#include <CASCArchive.hpp>
 
 #include <filesystem>
 #include <cassert>

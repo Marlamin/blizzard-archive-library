@@ -15,19 +15,19 @@ namespace BlizzardArchive::Archive
   {
   public:
     MPQArchive(std::string const& path, Locale locale, Listfile::Listfile* listfile);
-    ~MPQArchive();
+    ~MPQArchive() override;
 
     [[nodiscard]]
-    virtual bool openFile(Listfile::FileKey const& file_key, Locale locale, HANDLE* file_handle) const override;
+    bool openFile(Listfile::FileKey const& file_key, Locale locale, HANDLE* file_handle) const override;
     
-    virtual bool readFile(HANDLE file_handle, char* buffer, std::size_t buf_size) const override;
-    virtual bool closeFile(HANDLE file_handle) const override;
+    bool readFile(HANDLE file_handle, char* buffer, std::size_t buf_size) const override;
+    bool closeFile(HANDLE file_handle) const override;
 
     [[nodiscard]]
-    virtual std::uint64_t getFileSize(HANDLE file_handle) const override;
+    std::uint64_t getFileSize(HANDLE file_handle) const override;
 
     [[nodiscard]]
-    virtual bool exists(Listfile::FileKey const& file_key, Locale locale) const override;
+    bool exists(Listfile::FileKey const& file_key, Locale locale) const override;
 
   private:
     HANDLE _handle = nullptr;

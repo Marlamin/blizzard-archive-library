@@ -16,6 +16,9 @@ namespace BlizzardArchive::Archive
   {
   public:
     BaseArchive(std::string const& path, Locale locale, Listfile::Listfile* listfile);
+    virtual ~BaseArchive() = default;
+
+    [[nodiscard]]
     std::string const& path() const { return _path; };
 
     [[nodiscard]]
