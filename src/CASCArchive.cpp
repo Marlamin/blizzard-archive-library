@@ -75,7 +75,7 @@ std::uint64_t CASCArchive::getFileSize(HANDLE file_handle) const
 
 bool CASCArchive::exists(Listfile::FileKey const& file_key, Locale locale) const
 {
-  HANDLE* file_handle = nullptr;
+  HANDLE file_handle = nullptr;
   std::uint32_t file_data_id;
 
   assert(file_key.hasFileDataID() || file_key.hasFilepath());
@@ -92,7 +92,7 @@ bool CASCArchive::exists(Listfile::FileKey const& file_key, Locale locale) const
   }
 
 
-  bool status = CascOpenFile(_handle, &file_data_id, 0, 3, file_handle);
+  bool status = CascOpenFile(_handle, &file_data_id, 0, 3, &file_handle);
   CascCloseFile(file_handle);
   return status;
 
