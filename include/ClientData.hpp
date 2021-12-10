@@ -1,11 +1,12 @@
 #ifndef BLIZZARD_ARCHIVE_CLIENT_DATA_HPP
 #define BLIZZARD_ARCHIVE_CLIENT_DATA_HPP
 
-
 #include <array>
 #include <vector>
 #include <string>
+#include <optional>
 #include <string_view>
+
 #include <Listfile.hpp>
 
 typedef void* HANDLE;
@@ -19,16 +20,16 @@ namespace BlizzardArchive
   }
 
 
-  enum class ClientVersion
+  enum class ClientVersion : char
   {
-    WOTLK,
-    SL,
+    WOTLK = 0,
+    SL = 1,
   };
 
-  enum class StorageType
+  enum class StorageType : char
   {
-    MPQ,
-    CASC
+    MPQ = 0,
+    CASC = 1
   };
 
   enum class OpenMode
@@ -57,14 +58,21 @@ namespace BlizzardArchive
   public:
     /*
     * path - path to game directory for MPQ-based clients, path to storage directory (the one containing .build.info) for CASC-based clients.
+    * CDN URL for online CASC Storages.
     * version - version of the game client. Currently only WotLK and Shadowlands are supported.
     * locale - prefered locale of the client. Wotlk supports automatic detection, for that use Locale::AUTO
-    * local_path - project directory
+    * local_path - project directory, should also contain listfile.csv for CASC-based projects.
     */
     explicit ClientData(std::string const& path
       , ClientVersion version
       , Locale locale
       , std::string const& local_path);
+
+    explicit ClientData(std::string const& path
+        , std::string const& cdn_cache_path
+        , ClientVersion version
+        , Locale locale
+        , std::string const& local_path);
 
     ~ClientData();
 
@@ -141,6 +149,7 @@ namespace BlizzardArchive
     Locale _locale_mode;
     std::string _path;
     std::string _local_path;
+    std::optional<std::string> _cdn_cache_path;
 
     // A sorted list of loaded archives. The last one is the most up-to-date one.
     std::vector<Archive::BaseArchive*> _archives;

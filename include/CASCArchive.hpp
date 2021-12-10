@@ -14,7 +14,7 @@ namespace BlizzardArchive::Archive
   class CASCArchive : public BaseArchive
   {
   public:
-    CASCArchive(std::string const& path, Locale locale, Listfile::Listfile* listfile);
+    CASCArchive(std::string const& path, std::string const& cache_path, Locale locale, OpenMode open_mode, Listfile::Listfile* listfile);
     ~CASCArchive() override;
 
     [[nodiscard]]

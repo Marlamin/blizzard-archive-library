@@ -6,28 +6,65 @@
 
 using namespace BlizzardArchive::Archive;
 
-CASCArchive::CASCArchive(std::string const& path, Locale locale, Listfile::Listfile* listfile)
+CASCArchive::CASCArchive(std::string const& path
+                         , std::string const& cache_path
+                         , Locale locale
+                         , OpenMode open_mode
+                         , Listfile::Listfile* listfile)
   : BaseArchive(path, locale, listfile)
 {
-  CASC_OPEN_STORAGE_ARGS args;
-  args.Size = sizeof(CASC_OPEN_STORAGE_ARGS);
-  args.szLocalPath = path.c_str();
-  args.szCodeName = "wow";
-  args.szRegion = "us";
-  args.PfnProgressCallback = nullptr;
-  args.PtrProgressParam = nullptr;
-  args.PfnProductCallback = nullptr;
-  args.PtrProductParam = nullptr;
-  args.dwLocaleMask = 0;  // TODO: pass locale
-  args.szBuildKey = nullptr;
-  args.szCdnHostUrl = "http://%s.falloflordaeron.com:8000/%s/%s";
-
-
-  if (!CascOpenStorageEx(nullptr, &args, true, &_handle))
+  switch (open_mode)
   {
-    throw Exceptions::Archive::ArchiveOpenError("Error opening CASC archive: " + path 
-    + ". Error code: " + std::to_string(GetCascError()));
+    case OpenMode::REMOTE:
+    {
+      CASC_OPEN_STORAGE_ARGS args;
+      args.Size = sizeof(CASC_OPEN_STORAGE_ARGS);
+      args.szLocalPath = cache_path.c_str();
+      args.szCodeName = "wow";
+      args.szRegion = "us";
+      args.PfnProgressCallback = nullptr;
+      args.PtrProgressParam = nullptr;
+      args.PfnProductCallback = nullptr;
+      args.PtrProductParam = nullptr;
+      args.dwLocaleMask = 0;  // TODO: pass locale
+      args.szBuildKey = nullptr;
+      args.szCdnHostUrl = path.c_str();
+
+
+      if (!CascOpenStorageEx(nullptr, &args, true, &_handle))
+      {
+        throw Exceptions::Archive::ArchiveOpenError("Error opening CASC archive: " + path
+                                                    + ". Error code: " + std::to_string(GetCascError()));
+      }
+
+      break;
+    }
+    case OpenMode::LOCAL:
+    {
+      CASC_OPEN_STORAGE_ARGS args;
+      args.Size = sizeof(CASC_OPEN_STORAGE_ARGS);
+      args.szLocalPath = path.c_str();
+      args.szCodeName = "wow";
+      args.szRegion = "us";
+      args.PfnProgressCallback = nullptr;
+      args.PtrProgressParam = nullptr;
+      args.PfnProductCallback = nullptr;
+      args.PtrProductParam = nullptr;
+      args.dwLocaleMask = 0;  // TODO: pass locale
+      args.szBuildKey = nullptr;
+      args.szCdnHostUrl = nullptr;
+
+
+      if (!CascOpenStorageEx(nullptr, &args, false, &_handle))
+      {
+        throw Exceptions::Archive::ArchiveOpenError("Error opening CASC archive: " + path
+                                                    + ". Error code: " + std::to_string(GetCascError()));
+      }
+
+      break;
+    }
   }
+
 }
 
 bool CASCArchive::openFile(Listfile::FileKey const& file_key, Locale locale, HANDLE* file_handle) const

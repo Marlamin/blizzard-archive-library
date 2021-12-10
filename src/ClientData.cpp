@@ -12,11 +12,12 @@ namespace fs = std::filesystem;
 ClientData::ClientData(std::string const& path, ClientVersion version, Locale locale, std::string const& local_path)
   : _version(version)
   , _open_mode(OpenMode::LOCAL)
-  , _storage_type(version > ClientVersion::WOTLK ? StorageType::CASC : StorageType::MPQ)
+  , _storage_type((version > ClientVersion::WOTLK) ? StorageType::CASC : StorageType::MPQ)
   , _locale_mode(locale)
   , _path(path)
   , _local_path(ClientData::normalizeFilenameUnix(local_path))
 {
+
   validateLocale();
 
   switch (_storage_type)
@@ -27,8 +28,29 @@ ClientData::ClientData(std::string const& path, ClientVersion version, Locale lo
   case StorageType::CASC:
     initializeCASCStorage();
     break;
-  default:
-    break;
+  }
+}
+
+ClientData::ClientData(std::string const& path, std::string const& cdn_cache_path, ClientVersion version, Locale locale, std::string const& local_path)
+    : _version(version)
+    , _open_mode(OpenMode::REMOTE)
+    , _storage_type((version > ClientVersion::WOTLK) ? StorageType::CASC : StorageType::MPQ)
+    , _locale_mode(locale)
+    , _path(path)
+    , _local_path(ClientData::normalizeFilenameUnix(local_path))
+    , _cdn_cache_path(cdn_cache_path)
+{
+
+  validateLocale();
+
+  switch (_storage_type)
+  {
+    case StorageType::CASC:
+      initializeCASCStorage();
+      break;
+    case StorageType::MPQ:
+      throw Exceptions::Archive::ArchiveOpenError("MPQ storage does not support online loading.");
+      break;
   }
 }
 
@@ -101,50 +123,75 @@ void ClientData::initializeMPQStorage()
 void ClientData::initializeCASCStorage()
 {
   _listfile.initFromCSV((fs::path(_local_path) / "listfile.csv").string());
-  _archives.push_back(new Archive::CASCArchive(_path, _locale_mode, &_listfile));
+
+  switch (_open_mode)
+  {
+    case OpenMode::LOCAL:
+    {
+      _archives.push_back(new Archive::CASCArchive(_path, "", _locale_mode, _open_mode, &_listfile));
+      break;
+    }
+    case OpenMode::REMOTE:
+    {
+      assert(_cdn_cache_path.has_value());
+      _archives.push_back(new Archive::CASCArchive(_path, _cdn_cache_path.value(), _locale_mode, _open_mode, &_listfile));
+      break;
+    }
+  }
+
 }
 
 void ClientData::validateLocale()
 {
-  if (_storage_type == StorageType::MPQ)
+  switch (_storage_type)
   {
-    if (static_cast<int>(_locale_mode)) // manual locale
-    [[unlikely]]
+    case StorageType::MPQ:
     {
-      fs::path realmlist_path = fs::path(_path) / "Data" / ClientData::Locales[static_cast<int>(_locale_mode) - 1] / "realmlist.wtf";
-
-      if (!fs::exists(realmlist_path))
+      if (static_cast<int>(_locale_mode)) // manual locale
+      [[unlikely]]
       {
-        throw Exceptions::Locale::LocaleNotFoundError("Requested locale \"" + std::string(ClientData::Locales[static_cast<int>(_locale_mode) - 1].data()) + "\" does not exist in the client directory."
-          "Be sure, that there is one containing the file \"realmlist.wtf\".");
-      }
+        fs::path realmlist_path = fs::path(_path) / "Data"
+            / ClientData::Locales[static_cast<int>(_locale_mode) - 1] / "realmlist.wtf";
 
-    }
-    else // auto locale
-    [[likely]]
-    {
-      for (unsigned i = 0; i < ClientData::Locales.size(); ++i)
-      {
-        fs::path realmlist_path = fs::path(_path) / "Data" / ClientData::Locales[i] / "realmlist.wtf";
-
-        if (fs::exists(realmlist_path))
+        if (!fs::exists(realmlist_path))
         {
-          _locale_mode = static_cast<Locale>(i + 1);
-          return;
+          throw Exceptions::Locale::LocaleNotFoundError("Requested locale \""
+            + std::string(ClientData::Locales[static_cast<int>(_locale_mode) - 1].data()) +
+            "\" does not exist in the client directory."
+            "Be sure, that there is one containing the file \"realmlist.wtf\".");
         }
-      }
 
-      throw Exceptions::Locale::LocaleNotFoundError("Automatic locale detection failed. The client directory does not contain any locale directory. Be sure, that there is one containing the file \"realmlist.wtf\".");
+      }
+      else // auto locale
+      [[likely]]
+      {
+        for (unsigned i = 0; i < ClientData::Locales.size(); ++i)
+        {
+          fs::path realmlist_path = fs::path(_path) / "Data" / ClientData::Locales[i] / "realmlist.wtf";
+
+          if (fs::exists(realmlist_path))
+          {
+            _locale_mode = static_cast<Locale>(i + 1);
+            return;
+          }
+        }
+
+        throw Exceptions::Locale::LocaleNotFoundError("Automatic locale detection failed. "
+                                                      "The client directory does not contain any locale directory. Be "
+                                                      "sure, that there is one containing the file \"realmlist.wtf\".");
+      }
+      break;
     }
-  }
-  else if (_storage_type == StorageType::CASC)
-  {
-    if (_locale_mode == Locale::AUTO)
+    case StorageType::CASC:
     {
-      throw Exceptions::Locale::IncorrectLocaleModeError("Automatic locale detection is not supported for CASC-based clients.");
+      if (_locale_mode == Locale::AUTO)
+      {
+        throw Exceptions::Locale::IncorrectLocaleModeError("Automatic locale detection is not"
+                                                           " supported for CASC-based clients.");
+      }
+      break;
     }
   }
-  
   
 }
 
