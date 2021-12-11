@@ -12,17 +12,23 @@ FileKey::FileKey(std::string const& filepath, std::uint32_t file_data_id)
 , _file_path(ClientData::normalizeFilenameWoW(filepath))
 {}
 
-FileKey::FileKey(std::string const& filepath)
+FileKey::FileKey(std::string const& filepath, Listfile* listfile)
   : _file_path(ClientData::normalizeFilenameWoW(filepath))
-{}
-
-FileKey::FileKey(std::uint32_t file_data_id)
-  : _file_data_id(file_data_id)
-{}
-
-Listfile::Listfile()
 {
+  if (listfile)
+  {
+    deduceOtherComponent(listfile);
+  }
 
+}
+
+FileKey::FileKey(std::uint32_t file_data_id, Listfile* listfile)
+  : _file_data_id(file_data_id)
+{
+  if (listfile)
+  {
+    deduceOtherComponent(listfile);
+  }
 }
 
 void Listfile::initFromCSV(std::string const& listfile_path)
@@ -143,6 +149,20 @@ bool FileKey::deduceOtherComponent(const Listfile* listfile)
 
     _file_data_id = fdid;
     return true;
+  }
+
+  return false;
+}
+
+bool FileKey::operator==(const FileKey& rhs) const
+{
+  if (hasFileDataID() && rhs.hasFileDataID())
+  {
+    return _file_data_id == rhs.fileDataID();
+  }
+  else if (hasFilepath() && rhs.hasFilepath())
+  {
+    return filepath() == rhs.filepath();
   }
 
   return false;

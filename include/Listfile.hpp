@@ -6,13 +6,14 @@
 #include <optional>
 #include <vector>
 #include <unordered_map>
+#include <compare>
 
 namespace BlizzardArchive::Listfile
 {
   class Listfile
   {
   public:
-    Listfile();
+    Listfile() = default;
     ~Listfile() = default;
 
     void initFromCSV(std::string const& listfile_path);
@@ -29,8 +30,8 @@ namespace BlizzardArchive::Listfile
   class FileKey
   {
   public:
-    FileKey(std::string const& filepath);
-    FileKey(std::uint32_t file_data_id);
+    FileKey(std::string const& filepath, Listfile* listfile = nullptr);
+    FileKey(std::uint32_t file_data_id, Listfile* listfile = nullptr);
     FileKey(std::string const& filepath, std::uint32_t file_data_id);
 
     bool hasFilepath() const { return _file_path.has_value(); };
@@ -40,6 +41,8 @@ namespace BlizzardArchive::Listfile
     void setFilepath(std::string const& path) { _file_path = path; }
     void setFileDataID(std::uint32_t file_data_id) { _file_data_id = file_data_id; }
     bool deduceOtherComponent(const Listfile* listfile);
+
+    bool operator==(FileKey const& rhs) const;
 
   private:
     std::uint32_t _file_data_id = 0;
