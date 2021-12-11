@@ -9,11 +9,11 @@ using namespace BlizzardArchive::Listfile;
 
 FileKey::FileKey(std::string const& filepath, std::uint32_t file_data_id)
 : _file_data_id(file_data_id)
-, _file_path(ClientData::normalizeFilenameWoW(filepath))
+, _file_path(ClientData::normalizeFilenameInternal(filepath))
 {}
 
 FileKey::FileKey(std::string const& filepath, Listfile* listfile)
-  : _file_path(ClientData::normalizeFilenameWoW(filepath))
+  : _file_path(ClientData::normalizeFilenameInternal(filepath))
 {
   if (listfile)
   {
@@ -21,6 +21,21 @@ FileKey::FileKey(std::string const& filepath, Listfile* listfile)
   }
 
 }
+
+FileKey::FileKey(const char* filepath, Listfile* listfile)
+: _file_path(ClientData::normalizeFilenameInternal(filepath))
+{
+  if (listfile)
+  {
+    deduceOtherComponent(listfile);
+  }
+}
+
+FileKey::FileKey(const char* filepath, std::uint32_t file_data_id)
+  : _file_path(ClientData::normalizeFilenameInternal(filepath))
+  , _file_data_id(file_data_id)
+{}
+
 
 FileKey::FileKey(std::uint32_t file_data_id, Listfile* listfile)
   : _file_data_id(file_data_id)
@@ -56,7 +71,7 @@ void Listfile::initFromCSV(std::string const& listfile_path)
 
       uid = std::atoi(uid_str.c_str());
 
-      _path_to_fdid[ClientData::normalizeFilenameWoW(filename)] = uid;
+      _path_to_fdid[ClientData::normalizeFilenameInternal(filename)] = uid;
       _fdid_to_path[uid] = ClientData::normalizeFilenameWoW(filename);
 
     }
@@ -78,7 +93,7 @@ void Listfile::initFromFileList(std::vector<char> const& file_list_blob)
     }
     if (c == '\n')
     {
-      _path_to_fdid[ClientData::normalizeFilenameWoW(current)] = 0;
+      _path_to_fdid[ClientData::normalizeFilenameInternal(current)] = 0;
       current.resize(0);
     }
     else
@@ -89,7 +104,7 @@ void Listfile::initFromFileList(std::vector<char> const& file_list_blob)
 
   if (!current.empty())
   {
-    _path_to_fdid[ClientData::normalizeFilenameWoW(current)] = 0;
+    _path_to_fdid[ClientData::normalizeFilenameInternal(current)] = 0;
   }
 }
 
@@ -167,3 +182,29 @@ bool FileKey::operator==(const FileKey& rhs) const
 
   return false;
 }
+
+FileKey::FileKey(FileKey&& other) noexcept
+{
+  std::swap(_file_data_id, other._file_data_id);
+  std::swap(_file_path, other._file_path);
+}
+
+std::string FileKey::stringRepr() const
+{
+  return hasFilepath() ? _file_path.value() : std::to_string(_file_data_id);
+}
+
+bool FileKey::operator<(const FileKey& rhs) const
+{
+  if (hasFileDataID() && rhs.hasFileDataID())
+  {
+    return _file_data_id < rhs.fileDataID();
+  }
+  else if (hasFilepath() && rhs.hasFilepath())
+  {
+    return filepath() < rhs.filepath();
+  }
+
+  return false;
+}
+

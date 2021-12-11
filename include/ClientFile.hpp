@@ -24,7 +24,6 @@ namespace BlizzardArchive
     ClientFile& operator=(ClientFile const&) = delete;
     ClientFile& operator=(ClientFile&&) = delete;
 
-    [[nodiscard]]
     std::size_t read(void* dest, std::size_t bytes);
 
     [[nodiscard]]

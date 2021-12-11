@@ -31,7 +31,7 @@ MPQArchive::MPQArchive(std::string const& path, Locale locale, Listfile::Listfil
 bool MPQArchive::openFile(Listfile::FileKey const& file_key, Locale locale, HANDLE* file_handle) const
 {
   assert(file_key.hasFilepath());
-  return SFileOpenFileEx(_handle, file_key.filepath().c_str(), 0, file_handle);
+  return SFileOpenFileEx(_handle, ClientData::normalizeFilenameWoW(file_key.filepath()).c_str(), 0, file_handle);
 }
 
 bool MPQArchive::readFile(HANDLE file_handle, char* buffer, std::size_t buf_size) const
@@ -55,7 +55,7 @@ std::uint64_t MPQArchive::getFileSize(HANDLE file_handle) const
 bool MPQArchive::exists(Listfile::FileKey const& file_key, Locale locale) const
 {
   assert(file_key.hasFilepath());
-  return SFileHasFile(_handle, file_key.filepath().c_str());
+  return SFileHasFile(_handle, ClientData::normalizeFilenameWoW(file_key.filepath()).c_str());
 }
 
 MPQArchive::~MPQArchive()

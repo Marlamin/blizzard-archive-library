@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <mutex>
 #include <string_view>
 
 #include <Listfile.hpp>
@@ -156,6 +157,9 @@ namespace BlizzardArchive
     // A sorted list of loaded archives. The last one is the most up-to-date one.
     std::vector<Archive::BaseArchive*> _archives;
     Listfile::Listfile _listfile;
+
+    // sync
+    std::mutex _mutex;
 
 
   };

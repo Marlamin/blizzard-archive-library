@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <cassert>
+#include <regex>
 
 using namespace BlizzardArchive;
 namespace fs = std::filesystem;
@@ -197,6 +198,8 @@ void ClientData::validateLocale()
 
 bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& buffer)
 {
+  const std::lock_guard _lock(_mutex);
+
   HANDLE handle = nullptr;
 
   for (auto it = _archives.rbegin(); it != _archives.rend(); ++it)
@@ -207,8 +210,15 @@ bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& 
     std::uint64_t buf_size = (*it)->getFileSize(handle);
     buffer.resize(buf_size);
 
-    (*it)->readFile(handle, buffer.data(), buf_size);
-    (*it)->closeFile(handle);
+    if (!(*it)->readFile(handle, buffer.data(), buf_size))
+    {
+      assert(false);
+    }
+
+    if (!(*it)->closeFile(handle))
+    {
+      assert(false);
+    }
 
     return true;
   }
@@ -226,6 +236,13 @@ bool ClientData::existsOnDisk(Listfile::FileKey const& file_key)
 
 bool ClientData::exists(Listfile::FileKey const& file_key)
 {
+  const std::lock_guard _lock(_mutex);
+
+  if (ClientData::existsOnDisk(file_key))
+  {
+    return true;
+  }
+
   for (auto it = _archives.rbegin(); it != _archives.rend(); ++it)
   {
     if ((*it)->exists(file_key, _locale_mode))
@@ -237,6 +254,8 @@ bool ClientData::exists(Listfile::FileKey const& file_key)
 
 std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
 {
+  const std::lock_guard _lock(_mutex);
+
   if (file_key.hasFilepath())
   {
     return (fs::path(_local_path) / ClientData::normalizeFilenameUnix(file_key.filepath())).string();
@@ -279,9 +298,18 @@ std::string ClientData::normalizeFilenameInternal(std::string filename)
                    return c == '\\' ? '/' : c;
                  }
   );
+
+  if (filename.ends_with(".mdx"))
+  {
+    filename = std::regex_replace(filename, std::regex(".mdx"), ".m2");
+  }
+  else if(filename.ends_with(".mdl"))
+  {
+    filename = std::regex_replace(filename, std::regex(".mdl"), ".m2");
+  }
+
   return filename;
 }
-
 
 std::string ClientData::normalizeFilenameWoW(std::string filename)
 {
