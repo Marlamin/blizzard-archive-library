@@ -261,7 +261,6 @@ std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
 
 std::string ClientData::normalizeFilenameUnix(std::string filename)
 {
-  //std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
   std::transform(filename.begin(), filename.end(), filename.begin()
     , [](char c)
     {
@@ -270,6 +269,19 @@ std::string ClientData::normalizeFilenameUnix(std::string filename)
   );
   return filename;
 }
+
+std::string ClientData::normalizeFilenameInternal(std::string filename)
+{
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+  std::transform(filename.begin(), filename.end(), filename.begin()
+      , [](char c)
+                 {
+                   return c == '\\' ? '/' : c;
+                 }
+  );
+  return filename;
+}
+
 
 std::string ClientData::normalizeFilenameWoW(std::string filename)
 {

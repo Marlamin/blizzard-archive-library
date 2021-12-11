@@ -110,6 +110,9 @@ namespace BlizzardArchive
     static std::string normalizeFilenameUnix(std::string filename);
 
     [[nodiscard]]
+    static std::string normalizeFilenameInternal(std::string filename);
+
+    [[nodiscard]]
     static std::string normalizeFilenameWoW(std::string filename);
 
 
