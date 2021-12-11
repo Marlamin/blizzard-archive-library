@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <system_error>
+#include <cstring>
 
 using namespace BlizzardArchive;
 
@@ -46,6 +47,24 @@ ClientFile::ClientFile(Listfile::FileKey const& file_key, ClientData* client_dat
     + "' does not exist or some other error occured.");
 }
 
+
+std::size_t ClientFile::read(void* dest, size_t bytes)
+{
+  if (_eof || !bytes)
+    return 0;
+
+  size_t rpos = _pointer + bytes;
+  if (rpos > _buffer.size()) {
+    bytes = _buffer.size() - _pointer;
+    _eof = true;
+  }
+
+  std::memcpy(dest, &(_buffer[_pointer]), bytes);
+
+  _pointer = rpos;
+
+  return bytes;
+}
 
 bool ClientFile::isEof() const
 {

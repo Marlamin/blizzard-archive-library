@@ -24,16 +24,29 @@ namespace BlizzardArchive
     ClientFile& operator=(ClientFile const&) = delete;
     ClientFile& operator=(ClientFile&&) = delete;
 
+    [[nodiscard]]
     std::size_t read(void* dest, std::size_t bytes);
+
+    [[nodiscard]]
     std::size_t getSize() const;
+
+    [[nodiscard]]
     std::size_t getPos() const;
+
+    [[nodiscard]]
     char const* getBuffer() const;
+
+    [[nodiscard]]
     char const* getPointer() const;
+
+    [[nodiscard]]
     bool isEof() const;
+
     void seek(std::size_t offset);
     void seekRelative(std::size_t offset);
     void close();
 
+    [[nodiscard]]
     bool isExternal() const
     {
       return _external;

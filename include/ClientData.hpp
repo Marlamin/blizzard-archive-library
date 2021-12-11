@@ -102,7 +102,6 @@ namespace BlizzardArchive
     bool exists(Listfile::FileKey const& file_key);
 
     /* Static helper methods */
-
     [[nodiscard]]
     static bool existsOnDisk(Listfile::FileKey const& file_key);
 
