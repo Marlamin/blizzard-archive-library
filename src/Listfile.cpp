@@ -7,6 +7,12 @@
 
 using namespace BlizzardArchive::Listfile;
 
+FileKey::FileKey()
+: _file_data_id(0)
+, _file_path("")
+{
+}
+
 FileKey::FileKey(std::string const& filepath, std::uint32_t file_data_id)
 : _file_data_id(file_data_id)
 , _file_path(ClientData::normalizeFilenameInternal(filepath))
@@ -206,5 +212,12 @@ bool FileKey::operator<(const FileKey& rhs) const
   }
 
   return false;
+}
+
+FileKey& FileKey::operator=(FileKey&& other) noexcept
+{
+  std::swap(_file_data_id, other._file_data_id);
+  std::swap(_file_path, _file_path);
+  return *this;
 }
 
