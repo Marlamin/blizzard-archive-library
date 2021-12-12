@@ -33,22 +33,35 @@ namespace BlizzardArchive::Listfile
   class FileKey
   {
   public:
+    FileKey();
     FileKey(std::string const& filepath, Listfile* listfile = nullptr);
     FileKey(const char* filepath, Listfile* listfile = nullptr);
     explicit FileKey(std::uint32_t file_data_id, Listfile* listfile = nullptr);
     FileKey(std::string const& filepath, std::uint32_t file_data_id);
     FileKey(const char* filepath, std::uint32_t file_data_id);
     FileKey(FileKey const& other) = default;
+    FileKey& operator= (FileKey const& other) = default;
     FileKey(FileKey&& other) noexcept ;
+    FileKey& operator= (FileKey&& other) noexcept;
 
+    [[nodiscard]]
     bool hasFilepath() const { return _file_path.has_value(); };
+
+    [[nodiscard]]
     bool hasFileDataID() const { return static_cast<bool>(_file_data_id); };
+
+    [[nodiscard]]
     std::string const& filepath() const { return _file_path.value(); };
+
+    [[nodiscard]]
     std::uint32_t fileDataID() const { return _file_data_id; };
+
+    [[nodiscard]]
+    std::string stringRepr() const;
+
     void setFilepath(std::string const& path) { _file_path = path; }
     void setFileDataID(std::uint32_t file_data_id) { _file_data_id = file_data_id; }
     bool deduceOtherComponent(const Listfile* listfile);
-    std::string stringRepr() const;
 
     bool operator==(FileKey const& rhs) const;
     bool operator<(FileKey const& rhs) const;
