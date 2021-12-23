@@ -129,7 +129,7 @@ bool CASCArchive::exists(Listfile::FileKey const& file_key, Locale locale) const
   }
 
 
-  bool status = CascOpenFile(_handle, &file_data_id, 0, 3, &file_handle);
+  bool status = CascOpenFile(_handle, CASC_FILE_DATA_ID(file_data_id), 0, 3, &file_handle);
   CascCloseFile(file_handle);
   return status;
 
