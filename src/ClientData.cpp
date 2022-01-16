@@ -231,17 +231,17 @@ bool ClientData::existsOnDisk(Listfile::FileKey const& file_key)
   if (!file_key.hasFilepath())
     return false;
 
-  return fs::exists(file_key.filepath());
+  return fs::exists(getDiskPath(file_key));
 }
 
 bool ClientData::exists(Listfile::FileKey const& file_key)
 {
-  const std::lock_guard _lock(_mutex);
-
   if (ClientData::existsOnDisk(file_key))
   {
     return true;
   }
+
+  const std::lock_guard _lock(_mutex);
 
   for (auto it = _archives.rbegin(); it != _archives.rend(); ++it)
   {
