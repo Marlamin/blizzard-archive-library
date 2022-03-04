@@ -143,6 +143,7 @@ namespace BlizzardArchive
   private:
 
     void initializeMPQStorage();
+    void loadMPQArchive(std::string const& mpq_path);
     void initializeCASCStorage();
     void validateLocale();
 

@@ -1,6 +1,7 @@
 #include <ClientData.hpp>
 #include <Exception.hpp>
 #include <MPQArchive.hpp>
+#include <DirectoryArchive.hpp>
 #include <CASCArchive.hpp>
 
 #include <filesystem>
@@ -64,6 +65,23 @@ ClientData::~ClientData()
   }
 }
 
+void ClientData::loadMPQArchive(std::string const& mpq_path)
+{
+  if (!fs::exists(mpq_path))
+    return;
+
+  if (fs::is_directory(mpq_path))
+  {
+    _archives.push_back(new Archive::DirectoryArchive(mpq_path, _locale_mode, &_listfile));
+  }
+  else
+  {
+    _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
+  }
+
+
+}
+
 void ClientData::initializeMPQStorage()
 {
   for (auto const& filename : ClientData::ArchiveNameTemplates)
@@ -89,11 +107,7 @@ void ClientData::initializeMPQStorage()
       for (char j = '2'; j <= '9'; j++)
       {
         mpq_path.replace(location, 1, std::string(&j, 1));
-        if (fs::exists(mpq_path))
-        {
-          _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
-        }
-         
+        loadMPQArchive(mpq_path);
       }
     }
     else if (mpq_path.find("{character}") != std::string::npos)
@@ -103,18 +117,12 @@ void ClientData::initializeMPQStorage()
       for (char c = 'a'; c <= 'z'; c++)
       {
         mpq_path.replace(location, 1, std::string(&c, 1));
-        if (fs::exists(mpq_path))
-        {
-          _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
-        }
+        loadMPQArchive(mpq_path);
       }
     }
     else
     {
-      if (fs::exists(mpq_path))
-      {
-        _archives.push_back(new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile));
-      }
+      loadMPQArchive(mpq_path);
     }
   }
 
