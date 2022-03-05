@@ -18,7 +18,7 @@ namespace BlizzardArchive
   public:
 
     struct NEW_FILE_T {};
-    inline static constexpr NEW_FILE_T NEW_FILE;
+    inline static constexpr NEW_FILE_T NEW_FILE {};
 
     explicit ClientFile(Listfile::FileKey const& file_key, ClientData* client_data);
     explicit ClientFile(Listfile::FileKey const& file_key, ClientData* client_data, NEW_FILE_T);
