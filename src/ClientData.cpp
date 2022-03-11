@@ -67,7 +67,7 @@ ClientData::~ClientData()
 
 void ClientData::loadMPQArchive(std::string const& mpq_path)
 {
-  if (!fs::exists(mpq_path))
+  if (!fs::exists(mpq_path) || fs::equivalent(mpq_path, _local_path))
     return;
 
   if (fs::is_directory(mpq_path))
