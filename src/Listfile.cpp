@@ -2,7 +2,6 @@
 #include <Exception.hpp>
 #include <ClientData.hpp>
 #include <fstream>
-#include <sstream>
 #include <cstdint>
 
 using namespace BlizzardArchive::Listfile;
@@ -217,7 +216,21 @@ bool FileKey::operator<(const FileKey& rhs) const
 FileKey& FileKey::operator=(FileKey&& other) noexcept
 {
   std::swap(_file_data_id, other._file_data_id);
-  std::swap(_file_path, _file_path);
+  std::swap(_file_path, other._file_path);
+  return *this;
+}
+
+FileKey::FileKey(FileKey const& other)
+: _file_data_id(other._file_data_id)
+, _file_path(other._file_path)
+{
+}
+
+FileKey& FileKey::operator= (FileKey const& other)
+{
+  _file_data_id = other._file_data_id;
+  _file_path = other._file_path;
+
   return *this;
 }
 

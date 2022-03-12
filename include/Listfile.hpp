@@ -39,9 +39,11 @@ namespace BlizzardArchive::Listfile
     explicit FileKey(std::uint32_t file_data_id, Listfile* listfile = nullptr);
     FileKey(std::string const& filepath, std::uint32_t file_data_id);
     FileKey(const char* filepath, std::uint32_t file_data_id);
-    FileKey(FileKey const& other) = default;
-    FileKey& operator= (FileKey const& other) = default;
-    FileKey(FileKey&& other) noexcept ;
+
+    FileKey(FileKey const& other);
+    FileKey& operator= (FileKey const& other);
+
+    FileKey(FileKey&& other) noexcept;
     FileKey& operator= (FileKey&& other) noexcept;
 
     [[nodiscard]]
