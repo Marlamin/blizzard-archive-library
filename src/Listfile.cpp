@@ -2,6 +2,7 @@
 #include <Exception.hpp>
 #include <ClientData.hpp>
 #include <fstream>
+#include <sstream>
 #include <cstdint>
 
 using namespace BlizzardArchive::Listfile;
