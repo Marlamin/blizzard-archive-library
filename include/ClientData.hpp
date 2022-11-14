@@ -120,7 +120,7 @@ namespace BlizzardArchive
     inline static constexpr std::array<std::string_view, 10> Locales { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
 
     // Templates in correct order for opening the wotlk client MPQs
-    inline static constexpr std::array<std::string_view, 14> ArchiveNameTemplates { 
+    inline static constexpr std::array<std::string_view, 17> ArchiveNameTemplates { 
                                                                                     // common archives
                                                                                       "common.MPQ"
                                                                                     , "common-2.MPQ"
@@ -137,6 +137,9 @@ namespace BlizzardArchive
                                                                                     , "{locale}/patch-{locale}.MPQ"
                                                                                     , "{locale}/patch-{locale}-{number}.MPQ" 
                                                                                     , "{locale}/patch-{locale}-{character}.MPQ"
+                                                                                    , "{locale}/speech-{locale}.MPQ"
+                                                                                    , "{locale}/expansion-speech-{locale}.MPQ"
+                                                                                    , "{locale}/lichking-speech-{locale}.MPQ"
                                                                                     , "development.MPQ"
                                                                                   };
 
