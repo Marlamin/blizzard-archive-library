@@ -91,7 +91,7 @@ bool CASCArchive::openFile(Listfile::FileKey const& file_key, Locale locale, HAN
 bool CASCArchive::readFile(HANDLE file_handle, char* buffer, std::size_t buf_size) const
 {
   assert(file_handle);
-  return CascReadFile(file_handle, buffer, buf_size, nullptr);
+  return CascReadFile(file_handle, buffer, static_cast<DWORD>(buf_size), nullptr);
 }
 
 bool CASCArchive::closeFile(HANDLE file_handle) const

@@ -20,7 +20,7 @@ MPQArchive::MPQArchive(std::string const& path, Locale locale, Listfile::Listfil
     size_t filesize = SFileGetFileSize(fh, nullptr); 
 
     std::vector<char> readbuffer(filesize);
-    SFileReadFile(fh, readbuffer.data(), filesize, nullptr, nullptr);
+    SFileReadFile(fh, readbuffer.data(), static_cast<DWORD>(filesize), nullptr, nullptr);
     SFileCloseFile(fh);
 
     listfile->initFromFileList(readbuffer);
@@ -37,7 +37,7 @@ bool MPQArchive::openFile(Listfile::FileKey const& file_key, Locale locale, HAND
 bool MPQArchive::readFile(HANDLE file_handle, char* buffer, std::size_t buf_size) const
 {
   assert(file_handle);
-  return SFileReadFile(file_handle, buffer, buf_size, nullptr, nullptr);
+  return SFileReadFile(file_handle, buffer, static_cast<DWORD>(buf_size), nullptr, nullptr);
 }
 
 bool MPQArchive::closeFile(HANDLE file_handle) const
