@@ -115,7 +115,6 @@ namespace BlizzardArchive
     bool addFile(Listfile::FileKey const& file_key, Archive::BaseArchive* dest_archive);
 
 
-    using saveLocalFilesProgressCallback = std::function<void(int)>;
     // total files count, files success count
     std::array<int, 2> saveLocalFilesToArchive(Archive::MPQArchive* archive, bool compress, bool compact);
 
@@ -140,7 +139,7 @@ namespace BlizzardArchive
     inline static constexpr std::array<std::string_view, 10> Locales { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
 
     // Templates in correct order for opening the wotlk client MPQs
-    inline static constexpr std::array<std::string_view, 17> ArchiveNameTemplates { 
+    inline static constexpr std::array<std::string_view, 7> ArchiveNameTemplates{
                                                                                     // common archives
                                                                                       "common.MPQ"
                                                                                     , "common-2.MPQ"
@@ -149,9 +148,12 @@ namespace BlizzardArchive
                                                                                     , "patch.MPQ"
                                                                                     , "patch-{number}.MPQ"
                                                                                     , "patch-{character}.MPQ"
+    };
+
+    inline static constexpr std::array<std::string_view, 10> LocaleArchiveNameTemplates{
 
                                                                                     // locale-specific archives
-                                                                                    , "{locale}/locale-{locale}.MPQ"
+                                                                                      "{locale}/locale-{locale}.MPQ"
                                                                                     , "{locale}/expansion-locale-{locale}.MPQ"
                                                                                     , "{locale}/lichking-locale-{locale}.MPQ"
                                                                                     , "{locale}/patch-{locale}.MPQ"
@@ -161,7 +163,7 @@ namespace BlizzardArchive
                                                                                     , "{locale}/expansion-speech-{locale}.MPQ"
                                                                                     , "{locale}/lichking-speech-{locale}.MPQ"
                                                                                     , "development.MPQ"
-                                                                                  };
+    };
 
   private:
 

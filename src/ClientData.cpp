@@ -178,13 +178,9 @@ bool BlizzardArchive::ClientData::isMPQNameValid(std::string const& archive_name
 
     int const clientPatchId = 3; // 3.[3].5
 
+    // this doesn't include locale!
     for (auto const& filename : ClientData::ArchiveNameTemplates)
     {
-        // auto lower_filename = "";
-        // for (char ch : filename) {
-        //     // Convert each character to lowercase
-        //     lower_filename += std::tolower(ch);
-        // }
 
         std::string mpq_path = (fs::path(_path) / "Data" / filename).string();
 
@@ -265,12 +261,42 @@ void ClientData::loadMPQArchive(std::string const& mpq_path)
 
 void ClientData::initializeMPQStorage()
 {
-  for (auto const& filename : ClientData::ArchiveNameTemplates)
+
+    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+
+    // Re order the archives based on locale.
+    // for enGB and enUS clients, load locale before Data
+    // TODO : Confirms it is only those two clients
+    std::vector<std::string_view> OrderedArchiveNameTemplates;
+    OrderedArchiveNameTemplates.reserve(17);
+    if (locale == "enGB" || locale == "enUS")
+    {
+        for (auto const& locale_filename : ClientData::LocaleArchiveNameTemplates)
+        {
+            OrderedArchiveNameTemplates.push_back(locale_filename);
+        }
+        for (auto const& data_filename : ClientData::ArchiveNameTemplates)
+        {
+            OrderedArchiveNameTemplates.push_back(data_filename);
+        }
+    }
+    else
+    {
+        for (auto const& data_filename : ClientData::ArchiveNameTemplates)
+        {
+            OrderedArchiveNameTemplates.push_back(data_filename);
+        }
+        for (auto const& locale_filename : ClientData::LocaleArchiveNameTemplates)
+        {
+            OrderedArchiveNameTemplates.push_back(locale_filename);
+        }
+    }
+
+  for (auto const& filename : OrderedArchiveNameTemplates)
   {
     std::string mpq_path = (fs::path(_path) / "Data" / filename).string();
 
     std::string::size_type location(std::string::npos);
-    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
 
     do
     {
@@ -306,8 +332,6 @@ void ClientData::initializeMPQStorage()
       loadMPQArchive(mpq_path);
     }
   }
-
- 
 }
 
 void ClientData::initializeCASCStorage()
@@ -382,7 +406,6 @@ void ClientData::validateLocale()
       break;
     }
   }
-  
 }
 
 bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& buffer)
@@ -398,7 +421,7 @@ bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& 
 
     std::uint64_t buf_size = (*it)->getFileSize(file_handle);
 
-    // skip empty files, sometime there are empty duplicates in older MPQs.
+    // skip empty files
     if (!buf_size)
         continue;
 
@@ -429,7 +452,6 @@ std::array<int, 2> BlizzardArchive::ClientData::saveLocalFilesToArchive(Archive:
     const std::lock_guard _lock(_mutex);
 
     int file_count = 0;
-    // size_t file_fail = 0;
     int file_success = 0;
     std::array<int, 2> result_array = {0,0};
 
@@ -448,16 +470,11 @@ std::array<int, 2> BlizzardArchive::ClientData::saveLocalFilesToArchive(Archive:
         // Iterate through all files in the directory
         for (const auto& entry : fs::recursive_directory_iterator(_local_path)) {
             if (entry.is_regular_file()) {
-                // std::cout << "Processing file: " << entry.path() << std::endl;
 
                 std::string const extension = entry.path().extension().string();
                 // filter noggit files
                 if (extension == ".noggitproj" || extension == ".json" || extension == ".ini")
                     continue;
-
-                // test limit files count
-                // if (file_count >= 500)
-                //     break;
 
                 file_count++;
 
@@ -519,10 +536,6 @@ std::array<int, 2> BlizzardArchive::ClientData::saveLocalFilesToArchive(Archive:
                     }
                     else {
                         continue; // std::cerr << "Unable to open file: " << entry.path() << std::endl;
-                    }
-
-                    if (file_count % 20 == 0) {
-                        saveLocalFilesProgressCallback(file_count);
                     }
                 }
             }
