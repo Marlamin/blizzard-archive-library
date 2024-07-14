@@ -18,6 +18,7 @@ namespace BlizzardArchive::Listfile
 
     void initFromCSV(std::string const& listfile_path);
     void initFromFileList(std::vector<char> const& file_list_blob);
+    void addFile(std::string const& filepath);
 
     std::uint32_t getFileDataID(std::string const& filename) const;
     std::string getPath(std::uint32_t file_data_id) const;

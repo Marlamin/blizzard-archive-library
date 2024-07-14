@@ -114,6 +114,11 @@ void Listfile::initFromFileList(std::vector<char> const& file_list_blob)
   }
 }
 
+void BlizzardArchive::Listfile::Listfile::addFile(std::string const& filepath)
+{
+    _path_to_fdid[ClientData::normalizeFilenameInternal(filepath)] = 0;
+}
+
 std::uint32_t Listfile::getFileDataID(std::string const& filename) const
 {
   auto it = _path_to_fdid.find(filename);

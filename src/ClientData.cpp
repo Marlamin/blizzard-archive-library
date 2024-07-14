@@ -4,6 +4,8 @@
 #include <DirectoryArchive.hpp>
 #include <CASCArchive.hpp>
 
+#include <StormLib.h>
+
 #include <filesystem>
 #include <cassert>
 #include <regex>
@@ -63,6 +65,185 @@ ClientData::~ClientData()
   {
     delete archive;
   }
+}
+
+bool BlizzardArchive::ClientData::mpqArchiveExistsOnDisk(std::string const& archive_name)
+{
+    std::string mpq_path = (fs::path(_path) / "Data" / archive_name).string();
+
+    std::string::size_type location(std::string::npos);
+    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+
+    if (!fs::exists(mpq_path))
+        return false;
+
+    if (fs::is_directory(mpq_path))
+    {
+        return true; // directory patch. special return?
+    }
+    else
+    {
+        return true;
+    }
+}
+
+// archive_name = patch-4.MPQ, must include extension
+std::optional<Archive::MPQArchive*> BlizzardArchive::ClientData::getMPQArchive(std::string const& archive_name)
+{
+    if (_storage_type != StorageType::MPQ)
+        return std::nullopt;
+
+    const std::lock_guard _lock(_mutex);
+
+    // case sensitive
+    std::string mpq_path = (fs::path(_path) / "Data" / archive_name).string();
+
+    for (auto* archive_ptr : _archives)
+    {
+        // full disk paths.
+        if (archive_ptr->path() == mpq_path)
+        {
+            if (Archive::MPQArchive* mpqArchive_ptr = dynamic_cast<Archive::MPQArchive*>(archive_ptr))
+            {
+                return mpqArchive_ptr;
+            }
+        }
+    }
+
+    // if not in memory, try to get it on disk
+    if (mpqArchiveExistsOnDisk(archive_name))
+    {
+        Archive::MPQArchive* new_archive = new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile);
+        if (new_archive)
+        {
+            _archives.push_back(new_archive);
+            return new_archive;
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<Archive::MPQArchive*> BlizzardArchive::ClientData::tryCreateMPQArchive(std::string const& archive_name)
+{
+    if (_storage_type != StorageType::MPQ)
+        return std::nullopt;
+
+    // check if there is already a file
+    std::string mpq_path = (fs::path(_path) / "Data" / archive_name).string();
+
+    std::string::size_type location(std::string::npos);
+    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+
+    if (!fs::exists(mpq_path))
+    {
+        // create archive here or in MPQ class ?
+        HANDLE hMpq = NULL;
+        unsigned long dwMaxFileCount = 0x2000;// 0x1000 seems to be the default // 0x4 is the minimum
+
+        unsigned long dwCreateFlags = MPQ_CREATE_LISTFILE | MPQ_CREATE_ATTRIBUTES | MPQ_CREATE_ARCHIVE_V2; // v1 ?
+
+        if (SFileCreateArchive(mpq_path.c_str(), dwCreateFlags, dwMaxFileCount, &hMpq))
+        {
+            if (!SFileCloseArchive(hMpq))
+            {
+                DWORD error = GetLastError();
+                throw Exceptions::Archive::ArchiveCloseError("ClientData::tryCreateMPQArchive(): Error closing archive: " + mpq_path);
+            }
+
+            // now we can initialize the class and open it in read-only mode
+            Archive::MPQArchive* new_archive = new Archive::MPQArchive(mpq_path, _locale_mode, &_listfile);
+            if (new_archive)
+            {
+                _archives.push_back(new_archive);
+                return new_archive;
+            }
+        }
+        else
+        {
+            // failed to create archive
+            DWORD error = GetLastError();
+            throw Exceptions::Archive::ArchiveOpenError("ClientData::tryCreateMPQArchive(): Error creating archive: " + mpq_path, error);
+        }
+    }
+    return std::nullopt;
+}
+
+bool BlizzardArchive::ClientData::isMPQNameValid(std::string const& archive_name, bool exclude_base_mpqs)
+{
+    // Make sure archive_name is lowercase!
+
+    // if MPQ isn't in the list of allowed MPQs, return false
+    // if exclude_base_mpqs, return false if the MPQ is present in the base 3.3.5 client. (eg patch-3 would be wrong, patch-4 would be allowed)
+
+    int const clientPatchId = 3; // 3.[3].5
+
+    for (auto const& filename : ClientData::ArchiveNameTemplates)
+    {
+        // auto lower_filename = "";
+        // for (char ch : filename) {
+        //     // Convert each character to lowercase
+        //     lower_filename += std::tolower(ch);
+        // }
+
+        std::string mpq_path = (fs::path(_path) / "Data" / filename).string();
+
+        std::string::size_type location(std::string::npos);
+        std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+
+        do
+        {
+            location = mpq_path.find("{locale}");
+            if (location != std::string::npos)
+            {
+                mpq_path.replace(location, 8, locale);
+            }
+        } while (location != std::string::npos);
+
+        if (mpq_path.find("{number}") != std::string::npos)
+        {
+            location = mpq_path.find("{number}");
+            mpq_path.replace(location, 8, " ");
+            for (char j = '2'; j <= '9'; j++)
+            {
+                mpq_path.replace(location, 1, std::string(&j, 1));
+
+                // hack to lowercase the extension
+                auto mpq_filename = fs::path(mpq_path).filename().replace_extension(".mpq").string();
+                if (archive_name == mpq_filename)
+                {
+                    // convert j from char to int
+                    if (exclude_base_mpqs && (j - '0') <= 3)
+                        return false;
+                    else
+                        return true;
+                }
+            }
+        }
+        else if (mpq_path.find("{character}") != std::string::npos)
+        {
+            location = mpq_path.find("{character}");
+            mpq_path.replace(location, 11, " ");
+            for (char c = 'a'; c <= 'z'; c++)
+            {
+                mpq_path.replace(location, 1, std::string(&c, 1));
+                
+                // all letter patches are valid.
+                auto mpq_filename = fs::path(mpq_path).filename().replace_extension(".mpq").string();
+                if (archive_name == mpq_filename)
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            if (archive_name == fs::path(mpq_path).filename().replace_extension(".mpq").string())
+                return exclude_base_mpqs ? false : true;
+        }
+    }
+    // name was not in the list of allowed names.
+    return false;
 }
 
 void ClientData::loadMPQArchive(std::string const& mpq_path)
@@ -208,22 +389,27 @@ bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& 
 {
   const std::lock_guard _lock(_mutex);
 
-  HANDLE handle = nullptr;
+  HANDLE file_handle = nullptr;
 
   for (auto it = _archives.rbegin(); it != _archives.rend(); ++it)
   {
-    if (!(*it)->openFile(file_key, _locale_mode, &handle))
+    if (!(*it)->openFile(file_key, _locale_mode, &file_handle))
       continue;
 
-    std::uint64_t buf_size = (*it)->getFileSize(handle);
+    std::uint64_t buf_size = (*it)->getFileSize(file_handle);
+
+    // skip empty files, sometime there are empty duplicates in older MPQs.
+    if (!buf_size)
+        continue;
+
     buffer.resize(buf_size);
 
-    if (!(*it)->readFile(handle, buffer.data(), buf_size))
+    if (!(*it)->readFile(file_handle, buffer.data(), buf_size))
     {
       assert(false);
     }
 
-    if (!(*it)->closeFile(handle))
+    if (!(*it)->closeFile(file_handle))
     {
       assert(false);
     }
@@ -232,6 +418,135 @@ bool ClientData::readFile(Listfile::FileKey const& file_key, std::vector<char>& 
   }
 
   return false;
+}
+
+std::array<int, 2> BlizzardArchive::ClientData::saveLocalFilesToArchive(Archive::MPQArchive* archive, bool compress, bool compact)
+{
+    // Only supports MPQ currently.
+    if (_storage_type != StorageType::MPQ)
+        return {};
+
+    const std::lock_guard _lock(_mutex);
+
+    int file_count = 0;
+    // size_t file_fail = 0;
+    int file_success = 0;
+    std::array<int, 2> result_array = {0,0};
+
+    try {
+        // Check if the given path is a directory
+        if (!fs::is_directory(_local_path)) {
+            return result_array;
+        }
+
+        if (!archive->openForWritting())
+        {
+            return result_array;
+        }
+
+
+        // Iterate through all files in the directory
+        for (const auto& entry : fs::recursive_directory_iterator(_local_path)) {
+            if (entry.is_regular_file()) {
+                // std::cout << "Processing file: " << entry.path() << std::endl;
+
+                std::string const extension = entry.path().extension().string();
+                // filter noggit files
+                if (extension == ".noggitproj" || extension == ".json" || extension == ".ini")
+                    continue;
+
+                // test limit files count
+                // if (file_count >= 500)
+                //     break;
+
+                file_count++;
+
+                // use SFileAddFileEx high level function which does everything, or read manually
+                bool full_write_file = false;
+
+                if (!full_write_file)
+                {
+                    // get internal Wow path
+                    auto wow_path = fs::relative(entry.path(), fs::path(_local_path)).generic_string();
+
+                    try
+                    {
+                        // normalize path with filekey or nah ?
+                        bool success = archive->addFile(wow_path, entry.path().generic_string(), _locale_mode, 0, compress);
+                        if (success)
+                            file_success++;
+                        else
+                            continue;
+                    }
+                    catch (...)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    // Open the file
+                    std::ifstream file_stream(entry.path(), std::ios_base::binary | std::ios_base::in);
+                    if (file_stream.is_open())
+                    {
+                        // Get the file size
+                        file_stream.seekg(0, std::ios::end);
+                        std::size_t buf_size = file_stream.tellg();
+                        file_stream.seekg(0, std::ios::beg);
+
+                        // Allocate buffer
+                        char* buffer = new char[buf_size];
+                        // Read file into buffer
+                        file_stream.read(buffer, buf_size);
+                        file_stream.close();
+
+                        // get internal Wow path
+                        auto wow_path = fs::relative(entry.path(), fs::path(_local_path)).generic_string();
+                        try
+                        {
+                            bool success = archive->writeFile(wow_path, buffer, buf_size, _locale_mode, 0, compress);
+                            if (success)
+                                file_success++;
+                            else
+                                continue;
+                        }
+                        catch (...)
+                        {
+                            continue;
+                        }
+
+                        delete[] buffer;
+                    }
+                    else {
+                        continue; // std::cerr << "Unable to open file: " << entry.path() << std::endl;
+                    }
+
+                    if (file_count % 20 == 0) {
+                        saveLocalFilesProgressCallback(file_count);
+                    }
+                }
+            }
+        }
+
+        // compact if at least 1? file got added.
+        if (compact && file_success >= 1)
+        {
+            archive->compactArchive();
+        }
+
+        // close archive back to read-only
+        archive->closeToReadOnly();
+    }
+    catch (const fs::filesystem_error& ex) {
+        // std::cerr << "Filesystem error: " << ex.what() << std::endl;
+        return result_array;
+    }
+    catch (...)
+    {
+        archive->closeToReadOnly();
+    }
+
+    return result_array = {file_count, file_success};
 }
 
 bool ClientData::existsOnDisk(Listfile::FileKey const& file_key)

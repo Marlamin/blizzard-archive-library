@@ -25,7 +25,19 @@ namespace BlizzardArchive::Exceptions
     class ArchiveOpenError : public std::runtime_error
     {
     public:
-      ArchiveOpenError(const std::string& what = "") : std::runtime_error(what) {}
+      ArchiveOpenError(const std::string& what = "", int error_code = 0) : std::runtime_error(what) {}
+    };
+
+    class ArchiveCloseError : public std::runtime_error
+    {
+    public:
+        ArchiveCloseError(const std::string& what = "") : std::runtime_error(what) {}
+    };
+
+    class FileWriteFailedError : public std::runtime_error
+    {
+    public:
+        FileWriteFailedError(const std::string& what = "", int error_code = 0) : std::runtime_error(what + "\nError code:" + std::to_string(error_code)) {}
     };
   }
 

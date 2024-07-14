@@ -9,6 +9,7 @@
 #include <string_view>
 
 #include <Listfile.hpp>
+#include <functional>
 
 typedef void* HANDLE;
 
@@ -18,6 +19,7 @@ namespace BlizzardArchive
   namespace Archive
   {
     class BaseArchive;
+    class MPQArchive;
   }
 
 
@@ -77,6 +79,11 @@ namespace BlizzardArchive
 
     ~ClientData();
 
+    bool mpqArchiveExistsOnDisk(std::string const& archive_name);
+    std::optional<Archive::MPQArchive*> getMPQArchive(std::string const& archive_name);
+    std::optional<Archive::MPQArchive*> tryCreateMPQArchive(std::string const& archive_name);
+    bool isMPQNameValid(std::string const& archive_name, bool exclude_base_mpqs);
+
     [[nodiscard]]
     ClientVersion version() const { return _version; }
 
@@ -88,6 +95,11 @@ namespace BlizzardArchive
 
     [[nodiscard]]
     std::string const& path() const { return _path; }
+    [[nodiscard]]
+    std::string const& projectPath() const { return _local_path; }
+
+    [[nodiscard]]
+    BlizzardArchive::Locale const& locale_mode() const { return _locale_mode; }
 
     [[nodiscard]]
     std::string getDiskPath(Listfile::FileKey const& file_key);
@@ -98,6 +110,14 @@ namespace BlizzardArchive
 
     [[nodiscard]]
     bool readFile(Listfile::FileKey const& file_key, std::vector<char>& buffer);
+
+    bool addFile(Listfile::FileKey const& file_key, std::vector<char>& buffer, Archive::BaseArchive* dest_archive);
+    bool addFile(Listfile::FileKey const& file_key, Archive::BaseArchive* dest_archive);
+
+
+    using saveLocalFilesProgressCallback = std::function<void(int)>;
+    // total files count, files success count
+    std::array<int, 2> saveLocalFilesToArchive(Archive::MPQArchive* archive, bool compress, bool compact);
 
     [[nodiscard]]
     bool exists(Listfile::FileKey const& file_key);
@@ -154,7 +174,9 @@ namespace BlizzardArchive
     StorageType _storage_type;
     ClientVersion _version;
     Locale _locale_mode;
+    // client path
     std::string _path;
+    // project path
     std::string _local_path;
     std::optional<std::string> _cdn_cache_path;
 
