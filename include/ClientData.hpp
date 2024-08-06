@@ -41,19 +41,57 @@ namespace BlizzardArchive
     REMOTE
   };
 
+  // just used to map to string names in Locales, this isn't the actual locale field in DBCs
   enum class Locale
   {
     AUTO, 
     enGB,
     enUS,
-    deDE,
     koKR,
     frFR,
+    deDE,
     zhCN,
+    enCN,
     zhTW,
+    enTW,
     esES,
     esMX,
-    ruRU
+    ruRU,
+    jaJP,
+    ptPT,
+    ptBR,
+    itIT,
+    // unknown_12,
+    // unknown_13,
+    // unknown_14,
+    // unknown_15,
+  };
+
+  enum class LocaleLang
+  {
+      enUS = 0,
+      enGB = enUS,
+      koKR = 1,
+      frFR = 2,
+      deDE = 3,
+      enCN = 4,
+      zhCN = enCN,
+      enTW = 5,
+      zhTW = enTW,
+      esES = 6,
+      esMX = 7,
+      ruRU = 8,
+      jaJP = 9, // unused ?
+      ptPT = 10,
+      ptBR = ptPT,
+      itIT = 11,
+      /*
+      UNK12 = 12,
+      UNK13 = 13,
+      UNK14 = 14,
+      UNK15 = 15,
+      */
+      NUM_LOCALES = 16 // number of locales
   };
 
   class ClientData
@@ -100,6 +138,8 @@ namespace BlizzardArchive
 
     [[nodiscard]]
     BlizzardArchive::Locale const& locale_mode() const { return _locale_mode; }
+    // convert locale name to true locale id for localized strings
+    int const getLocaleId() const;
 
     [[nodiscard]]
     std::string getDiskPath(Listfile::FileKey const& file_key);
@@ -111,8 +151,8 @@ namespace BlizzardArchive
     [[nodiscard]]
     bool readFile(Listfile::FileKey const& file_key, std::vector<char>& buffer);
 
-    bool addFile(Listfile::FileKey const& file_key, std::vector<char>& buffer, Archive::BaseArchive* dest_archive);
-    bool addFile(Listfile::FileKey const& file_key, Archive::BaseArchive* dest_archive);
+    // bool addFile(Listfile::FileKey const& file_key, std::vector<char>& buffer, Archive::BaseArchive* dest_archive);
+    // bool addFile(Listfile::FileKey const& file_key, Archive::BaseArchive* dest_archive);
 
 
     // total files count, files success count
@@ -136,7 +176,8 @@ namespace BlizzardArchive
 
 
   public:
-    inline static constexpr std::array<std::string_view, 10> Locales { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
+    inline static constexpr std::array<std::string_view, 16> Locales { // Russian was added in TBC, Portugese and Italian were added in WotLK
+        "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "enCN", "zhTW", "enTW", "esES", "esMX", "ruRU", "jaJP", "ptPT", "ptBR", "itIT"}; // 12 to 15 = unknown
 
     // Templates in correct order for opening the wotlk client MPQs
     inline static constexpr std::array<std::string_view, 7> ArchiveNameTemplates{
@@ -176,10 +217,8 @@ namespace BlizzardArchive
     StorageType _storage_type;
     ClientVersion _version;
     Locale _locale_mode;
-    // client path
-    std::string _path;
-    // project path
-    std::string _local_path;
+    std::string _path; // client path
+    std::string _local_path; // project path
     std::optional<std::string> _cdn_cache_path;
 
     // A sorted list of loaded archives. The last one is the most up-to-date one.

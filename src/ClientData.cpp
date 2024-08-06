@@ -588,6 +588,43 @@ bool ClientData::exists(Listfile::FileKey const& file_key)
   return false;
 }
 
+int const BlizzardArchive::ClientData::getLocaleId() const
+{
+    switch (_locale_mode)
+    {
+    case BlizzardArchive::Locale::AUTO:
+    case BlizzardArchive::Locale::enGB:
+    case BlizzardArchive::Locale::enUS:
+        return static_cast<int>(LocaleLang::enUS);
+    case BlizzardArchive::Locale::koKR:
+        return static_cast<int>(LocaleLang::koKR);
+    case BlizzardArchive::Locale::frFR:
+        return static_cast<int>(LocaleLang::frFR);
+    case BlizzardArchive::Locale::deDE:
+        return static_cast<int>(LocaleLang::deDE);
+    case BlizzardArchive::Locale::zhCN:
+    case BlizzardArchive::Locale::enCN:
+        return static_cast<int>(LocaleLang::enCN);
+    case BlizzardArchive::Locale::zhTW:
+    case BlizzardArchive::Locale::enTW:
+        return static_cast<int>(LocaleLang::enTW);
+    case BlizzardArchive::Locale::esES:
+    case BlizzardArchive::Locale::esMX:
+        return static_cast<int>(LocaleLang::esES);
+    case BlizzardArchive::Locale::ruRU:
+        return static_cast<int>(LocaleLang::ruRU);
+    case BlizzardArchive::Locale::jaJP:
+        return static_cast<int>(LocaleLang::jaJP);
+    case BlizzardArchive::Locale::ptPT:
+    case BlizzardArchive::Locale::ptBR:
+        return static_cast<int>(LocaleLang::ptPT);
+    case BlizzardArchive::Locale::itIT:
+        return static_cast<int>(LocaleLang::itIT);
+    default:
+        throw Exceptions::Locale::IncorrectLocaleModeError("Unsupported locale mode");
+    }
+}
+
 std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
 {
   const std::lock_guard _lock(_mutex);
