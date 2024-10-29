@@ -206,6 +206,8 @@ namespace BlizzardArchive
                                                                                     , "development.MPQ"
     };
 
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
+
   private:
 
     void initializeMPQStorage();
