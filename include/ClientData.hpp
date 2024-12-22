@@ -138,6 +138,8 @@ namespace BlizzardArchive
 
     [[nodiscard]]
     BlizzardArchive::Locale const& locale_mode() const { return _locale_mode; }
+    std::string_view const locale_name() const { return ClientData::Locales[static_cast<int>(_locale_mode) - 1]; }
+
     // convert locale name to true locale id for localized strings
     int const getLocaleId() const;
 
@@ -145,6 +147,8 @@ namespace BlizzardArchive
     std::string getDiskPath(Listfile::FileKey const& file_key);
 
     const Listfile::Listfile* listfile() const { return &_listfile; }
+
+    const std::vector<Archive::BaseArchive*>* loadedArchives() const { return &_archives; }
 
     /* Methods used to universally request client file data in an archive type agnostic way. */
 
@@ -179,30 +183,59 @@ namespace BlizzardArchive
     inline static constexpr std::array<std::string_view, 16> Locales { // Russian was added in TBC, Portugese and Italian were added in WotLK
         "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "enCN", "zhTW", "enTW", "esES", "esMX", "ruRU", "jaJP", "ptPT", "ptBR", "itIT"}; // 12 to 15 = unknown
 
+    /* Reverse engineered enUS cleint patch priority
+    1.  Archive: Data\alternate.MPQ Priority : 134
+    2.  Archive : ..\Data\alternate.MPQ Priority : 134
+    3.  Archive : Data\patch - A.MPQ Priority : 133
+    4.  Archive : Data\patch - 3.MPQ Priority : 132
+    5.  Archive : Data\patch - 2.MPQ Priority : 131
+    6.  Archive : Data\enUS\patch - enUS - 3.MPQ Priority : 130
+    7.  Archive : Data\enUS\patch - enUS - 2.MPQ Priority : 129
+    8.  Archive : Data\patch.MPQ Priority : 128
+    9.  Archive : Data\enUS\patch - enUS.MPQ Priority : 127
+    10. Archive : Data\base.MPQ Priority : 100
+    11. Archive : Data\expansion.MPQ Priority : 49
+    12. Archive : Data\lichking.MPQ Priority : 48
+    13. Archive : Data\common - 2.MPQ Priority : 46
+    14. Archive : Data\common.MPQ Priority : 47
+    15. Archive : Data\enUS\locale - enUS.MPQ Priority : 45
+    16. Archive : Data\enUS\speech - enUS.MPQ Priority : 44
+    17. Archive : Data\enUS\expansion - locale - enUS.MPQ Priority : 43
+    18. Archive : Data\enUS\lichking - locale - enUS.MPQ Priority : 42
+    19. Archive : Data\enUS\expansion - speech - enUS.MPQ Priority : 41
+    20. Archive : Data\enUS\lichking - speech - enUS.MPQ Priority : 40
+    */
+
     // Templates in correct order for opening the wotlk client MPQs
-    inline static constexpr std::array<std::string_view, 7> ArchiveNameTemplates{
+    inline static constexpr std::array<std::string_view, 8> ArchiveNameTemplates{
                                                                                     // common archives
                                                                                       "common.MPQ"
                                                                                     , "common-2.MPQ"
-                                                                                    , "expansion.MPQ"
                                                                                     , "lichking.MPQ"
+                                                                                    , "expansion.MPQ"
+                                                                                    /* "base.MPQ" */
                                                                                     , "patch.MPQ"
                                                                                     , "patch-{number}.MPQ"
                                                                                     , "patch-{character}.MPQ"
+                                                                                    , "alternate.MPQ"
     };
 
     inline static constexpr std::array<std::string_view, 10> LocaleArchiveNameTemplates{
 
                                                                                     // locale-specific archives
-                                                                                      "{locale}/locale-{locale}.MPQ"
-                                                                                    , "{locale}/expansion-locale-{locale}.MPQ"
+                                                                                      "{locale}/lichking-speech-{locale}.MPQ"
+                                                                                    , "{locale}/expansion-speech-{locale}.MPQ"
+
                                                                                     , "{locale}/lichking-locale-{locale}.MPQ"
+                                                                                    , "{locale}/expansion-locale-{locale}.MPQ"
+
+                                                                                    , "{locale}/speech-{locale}.MPQ"
+                                                                                    , "{locale}/locale-{locale}.MPQ"
+
                                                                                     , "{locale}/patch-{locale}.MPQ"
                                                                                     , "{locale}/patch-{locale}-{number}.MPQ" 
                                                                                     , "{locale}/patch-{locale}-{character}.MPQ"
-                                                                                    , "{locale}/speech-{locale}.MPQ"
-                                                                                    , "{locale}/expansion-speech-{locale}.MPQ"
-                                                                                    , "{locale}/lichking-speech-{locale}.MPQ"
+
                                                                                     , "development.MPQ"
     };
 

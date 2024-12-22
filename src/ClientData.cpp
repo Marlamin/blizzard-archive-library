@@ -72,7 +72,7 @@ bool BlizzardArchive::ClientData::mpqArchiveExistsOnDisk(std::string const& arch
     std::string mpq_path = (fs::path(_path) / "Data" / archive_name).string();
 
     std::string::size_type location(std::string::npos);
-    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+    std::string_view const& locale = locale_name();
 
     if (!fs::exists(mpq_path))
         return false;
@@ -133,7 +133,7 @@ std::optional<Archive::MPQArchive*> BlizzardArchive::ClientData::tryCreateMPQArc
     std::string mpq_path = (fs::path(_path) / "Data" / archive_name).string();
 
     std::string::size_type location(std::string::npos);
-    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+    std::string_view const& locale = locale_name();
 
     if (!fs::exists(mpq_path))
     {
@@ -185,7 +185,7 @@ bool BlizzardArchive::ClientData::isMPQNameValid(std::string const& archive_name
         std::string mpq_path = (fs::path(_path) / "Data" / filename).string();
 
         std::string::size_type location(std::string::npos);
-        std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+        std::string_view const& locale = locale_name();
 
         do
         {
@@ -262,13 +262,15 @@ void ClientData::loadMPQArchive(std::string const& mpq_path)
 void ClientData::initializeMPQStorage()
 {
 
-    std::string_view const& locale = ClientData::Locales[static_cast<int>(_locale_mode) - 1];
+    std::string_view const& locale = locale_name();
 
     // Re order the archives based on locale.
-    // for enGB and enUS clients, load locale before Data
     // TODO : Confirms it is only those two clients
+
     std::vector<std::string_view> OrderedArchiveNameTemplates;
     OrderedArchiveNameTemplates.reserve(17);
+
+    // for enGB and enUS clients, load locale before Data
     if (locale == "enGB" || locale == "enUS")
     {
         for (auto const& locale_filename : ClientData::LocaleArchiveNameTemplates)
@@ -365,12 +367,12 @@ void ClientData::validateLocale()
       [[unlikely]]
       {
         fs::path realmlist_path = fs::path(_path) / "Data"
-            / ClientData::Locales[static_cast<int>(_locale_mode) - 1] / "realmlist.wtf";
+            / locale_name() / "realmlist.wtf";
 
         if (!fs::exists(realmlist_path))
         {
           throw Exceptions::Locale::LocaleNotFoundError("Requested locale \""
-            + std::string(ClientData::Locales[static_cast<int>(_locale_mode) - 1].data()) +
+            + std::string(locale_name().data()) +
             "\" does not exist in the client directory."
             "Be sure, that there is one containing the file \"realmlist.wtf\".");
         }
