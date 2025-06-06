@@ -1,3 +1,3 @@
-# DBCD-cpp
+# Blizzard Archive Library
 
-C++ library for reading DBC/DB2 database files from World of Warcraft with built-in support for WoWDBDefs definitions.
+C++ library wrapper for reading MPQ/CASC WoW storages using StormLib/CASCLib
