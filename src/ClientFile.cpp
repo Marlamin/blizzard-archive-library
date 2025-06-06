@@ -35,10 +35,22 @@ ClientFile::ClientFile(Listfile::FileKey const& file_key, ClientData* client_dat
     return;
   }
 
+  if (!client_data->exists(file_key)) {
+	  std::cout << "File does not exist: " << _disk_path << std::endl;
+	  _eof = true;
+	  return;
+  }
+
   if (client_data->readFile(file_key, _buffer))
   {
     _eof = false;
     return;
+  }
+  else 
+  {
+      std::cout << "Could not open file: " << _disk_path << std::endl;
+      _eof = true;
+      return;
   }
  
   throw Exceptions::FileReadFailedError(
@@ -71,6 +83,9 @@ std::size_t ClientFile::read(void* dest, size_t bytes)
   if (rpos > _buffer.size()) {
     bytes = _buffer.size() - _pointer;
     _eof = true;
+
+    if(bytes == 0)
+		return 0; // EOF reached, no bytes to read
   }
 
   std::memcpy(dest, &(_buffer[_pointer]), bytes);

@@ -105,7 +105,10 @@ std::uint64_t CASCArchive::getFileSize(HANDLE file_handle) const
   assert(file_handle);
   unsigned long long size;
 
-  CascGetFileSize64(file_handle, static_cast<PULONGLONG>(&size));
+  if (!CascGetFileSize64(file_handle, &size)) {
+      return 0;
+      //throw Exceptions::FileReadFailedError("Error getting file size from CASC. Error code: " + std::to_string(GetCascError()));
+  }
 
   return size;
 }
