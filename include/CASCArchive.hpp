@@ -31,6 +31,21 @@ namespace BlizzardArchive::Archive
 
   private:
     HANDLE _handle = nullptr;
+    typedef void (*SetConfigsFunc)(const char* buildConfig, const char* cdnConfig);
+    typedef void (*SetBaseDirFunc)(const char* wowFolder);
+    typedef void (*LoadFunc)();
+    typedef const char* (*GetBuildStringFunc)();
+    typedef const char* (*GetFileByIDFunc)(const uint32_t fileDataID);
+    typedef const bool (*FileExistsByIDFunc)(const uint32_t fileDataID);
+    typedef const uint64_t(*GetFileSizeByIDFunc)(const uint32_t fileDataID);
+
+    SetBaseDirFunc setBaseDir;
+    SetConfigsFunc setConfigs;
+    LoadFunc load;
+    GetBuildStringFunc getBuildString;
+    GetFileByIDFunc getFileByID;
+    GetFileSizeByIDFunc getFileSizeByID;
+    FileExistsByIDFunc fileExistsByID;
   };
 
 }
